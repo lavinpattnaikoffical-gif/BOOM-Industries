@@ -1,7 +1,11 @@
 import FireworksCanvas from './FireworksCanvas';
 import heroImg from '@/assets/hero-fireworks.jpg';
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  onInquiryClick?: () => void;
+}
+
+export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background image */}
@@ -9,54 +13,104 @@ export default function HeroSection() {
         <img
           src={heroImg}
           alt=""
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover"
+          style={{ opacity: 0.3 }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-night-deep/60 via-night-deep/40 to-night-deep" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(14,14,19,0.4) 0%, rgba(14,14,19,0.25) 40%, rgba(14,14,19,0.9) 85%, #0e0e13 100%)',
+          }}
+        />
       </div>
 
-      {/* Fireworks canvas */}
+      {/* Fireworks animation */}
       <FireworksCanvas />
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
-          <span className="text-xs font-body text-primary/80 tracking-widest uppercase">
-            Est. 1982 — Four Decades of Brilliance
+      {/* Ambient color orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/6 w-72 h-72 rounded-full blur-3xl opacity-20"
+             style={{ background: '#ef4444', animation: 'float-y 9s ease-in-out infinite' }} />
+        <div className="absolute top-1/3 right-1/5 w-56 h-56 rounded-full blur-3xl opacity-15"
+             style={{ background: '#f5b800', animation: 'float-y 11s ease-in-out infinite 2s' }} />
+        <div className="absolute bottom-1/3 left-1/2 w-48 h-48 rounded-full blur-3xl opacity-15"
+             style={{ background: '#16a34a', animation: 'float-y 13s ease-in-out infinite 4s' }} />
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 text-center px-5 max-w-5xl mx-auto">
+
+        {/* Brand tagline badge */}
+        <div className="mb-8">
+          <span className="boom-pill">
+            <span className="w-1.5 h-1.5 rounded-full mt-0.5" style={{ background: '#f5b800', animation: 'pulse-glow 2s ease-in-out infinite' }} />
+            Latur's Finest Fireworks — Since Decades
           </span>
         </div>
 
-        <h1 className="font-display font-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tight mb-6">
-          <span className="block text-foreground">Igniting</span>
-          <span className="block glow-text-multi mt-2">Celebrations</span>
-        </h1>
+        {/* Main Headline */}
+        <div className="mb-4">
+          <h1 className="font-display font-extrabold leading-[0.9] tracking-tight"
+              style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)', color: '#f9f5fd' }}>
+            Here Comes The
+          </h1>
+          <div
+            className="boom-headline font-display font-extrabold"
+            style={{
+              fontSize: 'clamp(4rem, 14vw, 10rem)',
+              lineHeight: '0.85',
+              letterSpacing: '-0.02em',
+              animation: 'boom-pulse 4s ease-in-out infinite',
+            }}
+          >
+            BOOM!
+          </div>
+        </div>
 
-        <p className="font-body text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          700+ fireworks crafted with passion. 4,000+ dealers across India.
+        {/* Sub text */}
+        <p
+          className="font-body text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
+          style={{ color: 'rgba(172,170,177,0.95)' }}
+        >
+          Fireworks Manufacturers, Wholesalers & Retailers —
           <br className="hidden sm:block" />
-          One legacy of trust lighting up every festival.
+          Lighting up Latur & beyond. All kinds of fireworks available!
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="#products"
-            className="group relative px-8 py-3.5 rounded-lg font-display font-semibold text-primary-foreground overflow-hidden transition-transform duration-200 active:scale-[0.97]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-ember to-primary bg-[length:200%_100%] animate-shimmer" />
-            <span className="relative z-10">Explore Products</span>
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+          <button onClick={onInquiryClick} className="btn-boom-primary text-base px-8 py-3.5">
+            📞 Inquire Now
+          </button>
+          <a href="/products" className="btn-boom-ghost text-base px-8 py-3.5">
+            🎆 View Products
           </a>
+          <a href="/gallery" className="btn-boom-ghost text-base px-8 py-3.5">
+            📸 See Gallery
+          </a>
+        </div>
 
-          <a
-            href="#about"
-            className="px-8 py-3.5 rounded-lg font-display font-medium text-foreground border border-foreground/20 hover:border-primary/40 hover:text-primary transition-all duration-300 active:scale-[0.97]"
-          >
-            Our Story
-          </a>
+        {/* Trust Badges */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {[
+            { icon: '🏭', text: 'Direct Manufacturers' },
+            { icon: '🛡️', text: 'Safety Certified' },
+            { icon: '🚚', text: 'Pan India Supply' },
+            { icon: '📦', text: 'Wholesale & Retail' },
+          ].map(badge => (
+            <div key={badge.text} className="trust-badge">
+              <span>{badge.icon}</span>
+              <span>{badge.text}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
+      {/* Bottom fade */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 z-10 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, #0e0e13, transparent)' }}
+      />
     </section>
   );
 }
