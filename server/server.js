@@ -372,32 +372,34 @@ app.delete('/api/admins/:id', [authMiddleware, superAdminMiddleware], async (req
   } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 });
 
+// Health Check endpoint
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 // Serve static assets in production
-if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, '../dist')));
+if (process.env.NODE_ENV === 'production' || true) { // Default to production logic for simplicity in deployment
+  const distPath = path.join(__dirname, '../dist');
+  app.use(express.static(distPath));
 
   app.get('*', (req, res) => {
-    // Check if the request is an API request
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'Route not found' });
     }
-    res.sendFile(path.resolve(__dirname, '../dist', 'index.html'));
+    res.sendFile(path.resolve(distPath, 'index.html'));
   });
 }
 
 // START
 const PORT = process.env.PORT || 5000;
 
-
-async function startServer() {
+app.listen(PORT, '0.0.0.0', async () => {
+  console.log(`Server started on port ${PORT}`);
   try {
+    console.log('Initializing database...');
     await initDatabase();
     await initSuperAdmin();
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+    console.log('Database and SuperAdmin initialized successfully');
   } catch (err) {
-    console.error('Failed to start server:', err);
+    console.error('Initialization error (continuing despite failure):', err.message);
   }
-}
+});
 
-startServer();
