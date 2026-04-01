@@ -376,17 +376,18 @@ app.delete('/api/admins/:id', [authMiddleware, superAdminMiddleware], async (req
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
 // Serve static assets in production
-if (process.env.NODE_ENV === 'production' || true) { // Default to production logic for simplicity in deployment
+if (process.env.NODE_ENV === 'production') {
   const distPath = path.join(__dirname, '../dist');
   app.use(express.static(distPath));
 
-  app.get('*', (req, res) => {
+  app.get('/*', (req, res) => {
     if (req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'Route not found' });
     }
     res.sendFile(path.resolve(distPath, 'index.html'));
   });
 }
+
 
 // START
 const PORT = process.env.PORT || 5000;
