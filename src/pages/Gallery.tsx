@@ -16,91 +16,100 @@ interface GalleryItem {
   src: string;
   thumbnail?: string;
   videoId?: string;
+  videoPlatform?: 'youtube' | 'instagram';
   description?: string;
 }
 
 const GALLERY_ITEMS: GalleryItem[] = [
   {
+    id: 'r1',
+    type: 'video',
+    title: 'Grand Night Display',
+    category: 'event',
+    videoPlatform: 'instagram',
+    videoId: 'DFxGzH2v8XG',
+    src: '',
+    thumbnail: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&h=600&fit=crop',
+    description: 'A spectacular night show captured on Instagram.',
+  },
+  {
+    id: 'r2',
+    type: 'video',
+    title: 'Wedding Celebration',
+    category: 'event',
+    videoPlatform: 'instagram',
+    videoId: 'DJeiciQP2Ws',
+    src: '',
+    thumbnail: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=600&fit=crop',
+    description: 'Adding magic to weddings.',
+  },
+  {
+    id: 'r3',
+    type: 'video',
+    title: 'Festival Burst',
+    category: 'event',
+    videoPlatform: 'instagram',
+    videoId: 'DLPg3xoPvfq',
+    src: '',
+    thumbnail: 'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=800&h=600&fit=crop',
+    description: 'Festivals lit up with Boom Industries.',
+  },
+  {
+    id: 'r4',
+    type: 'video',
+    title: 'Aerial Spectacle',
+    category: 'event',
+    videoPlatform: 'instagram',
+    videoId: 'DLDHg5PPSRH',
+    src: '',
+    thumbnail: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=800&h=600&fit=crop',
+    description: 'Stunning aerial firework displays.',
+  },
+  {
+    id: 'r5',
+    type: 'video',
+    title: 'Corporate Launch',
+    category: 'event',
+    videoPlatform: 'instagram',
+    videoId: 'DEbTU23BlPX',
+    src: '',
+    thumbnail: 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop',
+    description: 'Perfect for grand openings.',
+  },
+  {
+    id: 'r6',
+    type: 'video',
+    title: 'Boom Highlights',
+    category: 'event',
+    videoPlatform: 'instagram',
+    videoId: 'C3vVA2rC8n_',
+    src: '',
+    thumbnail: 'https://images.unsplash.com/photo-1496024840928-4c41702d51f7?w=800&h=600&fit=crop',
+    description: 'Capturing the best moments.',
+  },
+  {
     id: '1',
     type: 'image',
-    title: 'Sky Rockets Display',
-    category: 'product',
+    title: 'Grand Sky Display',
+    category: 'event',
     src: 'https://images.unsplash.com/photo-1518617330791-e5e2b7f1ee3b?w=800&h=600&fit=crop',
-    description: 'Premium sky rockets with golden sparks',
-  },
-  {
-    id: '2',
-    type: 'image',
-    title: 'Diwali Celebration',
-    category: 'event',
-    src: 'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=800&h=600&fit=crop',
-    description: 'Festival fireworks lighting up the night',
-  },
-  {
-    id: '3',
-    type: 'video',
-    title: 'Fireworks Show Compilation',
-    category: 'event',
-    videoId: 'Tq4qCWzVUjQ',
-    thumbnail: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop',
-    description: 'Extended fireworks show compilation',
+    description: 'A spectacular sky show from one of our major events.',
   },
   {
     id: '4',
     type: 'image',
-    title: 'Fountain Sparkles',
+    title: 'Premium Multi-Shot',
     category: 'product',
     src: 'https://images.unsplash.com/photo-1531697897236-8a8d5b6bae38?w=800&h=600&fit=crop',
-    description: 'Elegant fountain fireworks with cascading sparks',
-  },
-  {
-    id: '5',
-    type: 'image',
-    title: 'Manufacturing Process',
-    category: 'behind-scenes',
-    src: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=600&fit=crop',
-    description: 'Behind-the-scenes production facility',
-  },
-  {
-    id: '6',
-    type: 'image',
-    title: 'Quality Testing',
-    category: 'behind-scenes',
-    src: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop',
-    description: 'Rigorous quality testing procedures',
-  },
-  {
-    id: '7',
-    type: 'video',
-    title: 'Product Showcase',
-    category: 'product',
-    videoId: 'k3dB8rLQ5P0',
-    thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&h=600&fit=crop',
-    description: 'Product demonstration video',
-  },
-  {
-    id: '8',
-    type: 'image',
-    title: 'Wedding Celebration',
-    category: 'event',
-    src: 'https://images.unsplash.com/photo-1519167758481-dc8986ba6c28?w=800&h=600&fit=crop',
-    description: 'Fireworks at wedding celebrations',
-  },
-  {
-    id: '9',
-    type: 'image',
-    title: 'New Year Spectacular',
-    category: 'event',
-    src: 'https://images.unsplash.com/photo-1533995405351-8dc4195d0f90?w=800&h=600&fit=crop',
-    description: 'New Year fireworks spectacle',
+    description: 'Our high-end multi-shot aerial displays in action.',
   },
 ];
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
-  { value: 'product', label: 'Products' },
+  { value: 'video', label: 'Videos' },
+  { value: 'image', label: 'Photos' },
   { value: 'event', label: 'Events' },
-  { value: 'behind-scenes', label: 'Behind Scenes' },
 ];
 
 interface LightboxProps {
@@ -147,14 +156,19 @@ const Lightbox = ({ item, allItems, onClose, onNext, onPrev }: LightboxProps) =>
               className="w-full h-full object-contain"
             />
           ) : (
-            <div className="w-full aspect-video">
+            <div className={`w-full ${item.videoPlatform === 'instagram' ? 'h-full max-w-[400px]' : 'aspect-video'}`}>
               <iframe
                 width="100%"
                 height="100%"
-                src={`https://www.youtube.com/embed/${item.videoId}`}
+                src={
+                  item.videoPlatform === 'instagram'
+                    ? `https://www.instagram.com/reel/${item.videoId}/embed`
+                    : `https://www.youtube.com/embed/${item.videoId}`
+                }
                 title={item.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                className={item.videoPlatform === 'instagram' ? 'rounded-xl' : ''}
               />
             </div>
           )}
@@ -255,11 +269,12 @@ export default function Gallery() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
-  const [modalOpen] = useState(false);
 
   const filtered =
     selectedCategory === 'all'
       ? GALLERY_ITEMS
+      : selectedCategory === 'video' || selectedCategory === 'image'
+      ? GALLERY_ITEMS.filter((item) => item.type === selectedCategory)
       : GALLERY_ITEMS.filter((item) => item.category === selectedCategory);
 
   const handleNext = () => {

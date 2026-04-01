@@ -1,14 +1,17 @@
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useNavigate } from 'react-router-dom';
+import { Phone, Sparkle, Play } from 'lucide-react';
 
 interface FeatureBoxesProps {
   onInquiryClick?: () => void;
+  onProductsClick?: () => void;
+  onMediaClick?: () => void;
 }
 
 const features = [
   {
-    emoji: '📞',
-    title: 'Get a Custom Quote',
+    icon: Phone,
+    title: 'Get a Quote',
     description: 'Planning an event or stocking up? Get personalized pricing tailored to your budget. Retail, bulk, or event — we have the best rates in Latur.',
     cta: 'Inquire Now →',
     color: '#ef4444',
@@ -17,9 +20,9 @@ const features = [
     action: 'contact',
   },
   {
-    emoji: '🎆',
+    icon: Sparkle,
     title: 'Our Products',
-    description: 'Explore 700+ varieties — rockets, sparklers, fountains, aerial shells, sound crackers, sky shots, gift boxes & more. All brands available!',
+    description: 'Explore our wide range of fireworks — Factory, Bomb, Flower Pot, Chakkar, 9 cm & more. High quality, best prices.',
     cta: 'Browse Catalog →',
     color: '#f5b800',
     glowColor: 'rgba(245,184,0,0.2)',
@@ -27,9 +30,9 @@ const features = [
     action: 'products',
   },
   {
-    emoji: '🎥',
-    title: 'Photo & Video Gallery',
-    description: "Watch our spectacular firework displays and event highlights. See why Boom Fireworks lights up Latur's biggest celebrations.",
+    icon: Play,
+    title: 'Watch Our Work',
+    description: "Watch our spectacular firework displays and event highlights. See why Boom Industries lights up Latur's biggest celebrations.",
     cta: 'Open Gallery →',
     color: '#16a34a',
     glowColor: 'rgba(22,163,74,0.2)',
@@ -38,14 +41,13 @@ const features = [
   },
 ];
 
-export default function FeatureBoxes({ onInquiryClick }: FeatureBoxesProps) {
+export default function FeatureBoxes({ onInquiryClick, onProductsClick, onMediaClick }: FeatureBoxesProps) {
   const ref = useScrollReveal();
-  const navigate = useNavigate();
 
   const handleAction = (action: string) => {
     if (action === 'contact') onInquiryClick?.();
-    else if (action === 'products') navigate('/products');
-    else if (action === 'gallery') navigate('/gallery');
+    else if (action === 'products') onProductsClick?.();
+    else if (action === 'gallery') onMediaClick?.();
   };
 
   return (
@@ -97,7 +99,7 @@ export default function FeatureBoxes({ onInquiryClick }: FeatureBoxesProps) {
                   boxShadow: `0 0 20px ${feat.glowColor}`,
                 }}
               >
-                {feat.emoji}
+                <feat.icon className="w-8 h-8" style={{ color: feat.color }} />
               </div>
 
               {/* Content */}

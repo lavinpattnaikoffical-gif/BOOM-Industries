@@ -45,7 +45,7 @@ export default function Footer() {
               <span className="boom-M">M</span>
             </div>
             <p className="text-sm font-display font-semibold mb-1" style={{ color: 'rgba(249,245,253,0.6)' }}>
-              Fireworks
+              Industries
             </p>
             <p className="text-xs font-body italic mb-5" style={{ color: 'rgba(172,170,177,0.6)' }}>
               "Here Comes The Boom 🎆"
@@ -59,16 +59,16 @@ export default function Footer() {
 
             {/* Contact Details */}
             <div className="space-y-2.5">
-              <a href="tel:9922097669"
+              <a href="tel:9920976669"
                  className="flex items-center gap-2.5 text-sm font-body group"
                  style={{ color: 'rgba(172,170,177,0.8)' }}>
                 <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#16a34a' }} />
-                <span className="group-hover:text-green-400 transition-colors">9922097669</span>
+                <span className="group-hover:text-green-400 transition-colors">9920976669</span>
               </a>
               <div className="flex items-start gap-2.5 text-sm font-body"
                    style={{ color: 'rgba(172,170,177,0.8)' }}>
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: '#ef4444' }} />
-                <span>In front of Rajmata School, Sale Galli, Gunigolai, Scrap Market Road, Gunigolai, Latur - 413 512</span>
+                <span>In front of Rajmata School, Sale Galli, Gunjgolai, Latur – 413 512</span>
               </div>
               <a href="https://instagram.com/boom_fireworks_official" target="_blank" rel="noopener noreferrer"
                  className="flex items-center gap-2.5 text-sm font-body group"
@@ -86,17 +86,11 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2.5">
-              {quickLinks.map(link => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm font-body transition-colors duration-300 hover:text-yellow-400"
-                    style={{ color: 'rgba(172,170,177,0.7)' }}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+              <li><a href="/products" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Products</a></li>
+              <li><a href="/what-we-offer" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">What We Offer</a></li>
+              <li><a href="/gallery" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Events</a></li>
+              <li><a href="/contact" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+              <li><a href="/admin" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Admin Login</a></li>
             </ul>
           </div>
 
@@ -161,7 +155,7 @@ export default function Footer() {
           style={{ borderTop: '1px solid rgba(72,71,77,0.2)' }}
         >
           <p className="text-xs font-body" style={{ color: 'rgba(172,170,177,0.4)' }}>
-            © 2026 Boom Fireworks, Latur. All rights reserved.
+            © 2026 Boom Industries, Latur. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
             {['Privacy Policy', 'Terms', 'Safety Guidelines'].map(item => (

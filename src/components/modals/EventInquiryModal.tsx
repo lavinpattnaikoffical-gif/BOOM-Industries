@@ -1,0 +1,189 @@
+import { useState, useEffect } from 'react';
+import { X, Phone, User, Calendar, MapPin, Loader2, CheckCircle, MessageSquare, Sparkles } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { submitInquiry } from '@/api/inquiries';
+
+interface EventInquiryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function EventInquiryModal({ isOpen, onClose }: EventInquiryModalProps) {
+  const [form, setForm] = useState({ name: '', phone: '', email: '', eventType: '', eventDate: '', location: '', budget: '', requirements: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (errors[e.target.name]) setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+  };
+
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = 'Name is required';
+    if (!form.phone.trim()) errs.phone = 'Phone number is required';
+    if (!form.eventType.trim()) errs.eventType = 'Event type is required';
+    if (!form.location.trim()) errs.location = 'Location is required';
+    return errs;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+
+    setSubmitting(true);
+    try {
+      // Store in admin panel
+      await submitInquiry({
+        ...form,
+        requirement: `Event: ${form.eventType}`,
+        city: form.location
+      } as any);
+      
+      setSubmitted(true);
+      toast({
+        title: '🎉 Event Inquiry Received!',
+        description: `Thank you ${form.name}! We'll contact you shortly. Click below to chat on WhatsApp.`,
+      });
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to submit inquiry. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleWhatsAppRedirect = () => {
+    const message = `Event Inquiry from ${form.name}. Event: ${form.eventType} on ${form.eventDate || 'TBD'} at ${form.location}. Budget: ${form.budget || 'N/A'}. Details: ${form.requirements || 'N/A'}. Phone: ${form.phone}.`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/919920976669?text=${encodedMessage}`, '_blank');
+    
+    setTimeout(() => {
+      setSubmitted(false);
+      setForm({ name: '', phone: '', email: '', eventType: '', eventDate: '', location: '', budget: '', requirements: '' });
+      onClose();
+    }, 1000);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-box max-w-lg" onClick={e => e.stopPropagation()}>
+        <div className="flex items-start justify-between p-6 pb-4 border-b border-white/10">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="w-6 h-6 text-yellow-500" />
+              <h2 className="font-display font-bold text-xl text-foreground">Plan My Event</h2>
+            </div>
+            <p className="text-sm font-body text-muted-foreground">Book a spectacular firework show.</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg bg-white/5 text-muted-foreground hover:text-primary transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {submitted ? (
+            <div className="text-center py-8">
+              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
+              <h3 className="font-display font-bold text-xl mb-4 text-foreground">Inquiry Sent! 🎉</h3>
+              <button
+                onClick={handleWhatsAppRedirect}
+                className="btn-boom-green w-full py-4 text-base flex items-center justify-center gap-2"
+              >
+                <MessageSquare className="w-5 h-5" /> Chat on WhatsApp
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1.5 text-foreground">
+                    <User className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Name *
+                  </label>
+                  <input name="name" value={form.name} onChange={handleChange} placeholder="Your Name" className="boom-input" />
+                  {errors.name && <p className="text-xs mt-1 text-red-500">{errors.name}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1.5 text-foreground">
+                    <Phone className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Phone *
+                  </label>
+                  <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" className="boom-input" />
+                  {errors.phone && <p className="text-xs mt-1 text-red-500">{errors.phone}</p>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1.5 text-foreground">Email (optional)</label>
+                <input name="email" value={form.email} onChange={handleChange} placeholder="Email Address" className="boom-input" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1.5 text-foreground">Event Type *</label>
+                  <select name="eventType" value={form.eventType} onChange={handleChange} className="boom-select w-full">
+                    <option value="">Select Type</option>
+                    <option value="Wedding">Wedding</option>
+                    <option value="Festival">Festival</option>
+                    <option value="Corporate">Corporate</option>
+                    <option value="Birthday">Birthday</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  {errors.eventType && <p className="text-xs mt-1 text-red-500">{errors.eventType}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1.5 text-foreground">
+                    <Calendar className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Date
+                  </label>
+                  <input type="date" name="eventDate" value={form.eventDate} onChange={handleChange} className="boom-input" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1.5 text-foreground">
+                    <MapPin className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Location *
+                  </label>
+                  <input name="location" value={form.location} onChange={handleChange} placeholder="City/Venue" className="boom-input" />
+                  {errors.location && <p className="text-xs mt-1 text-red-500">{errors.location}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1.5 text-foreground">Budget (optional)</label>
+                  <input name="budget" value={form.budget} onChange={handleChange} placeholder="e.g. ₹50k" className="boom-input" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1.5 text-foreground">Requirements</label>
+                <textarea name="requirements" value={form.requirements} onChange={handleChange} placeholder="Tell us more about your event..." className="boom-input min-h-[60px]" />
+              </div>
+
+              <button type="submit" disabled={submitting} className="w-full btn-boom-primary py-3.5 mt-2 flex items-center justify-center gap-2">
+                {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : 'Send Event Inquiry'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

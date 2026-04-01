@@ -44,7 +44,7 @@ export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
         <div className="mb-8">
           <span className="boom-pill">
             <span className="w-1.5 h-1.5 rounded-full mt-0.5" style={{ background: '#f5b800', animation: 'pulse-glow 2s ease-in-out infinite' }} />
-            Latur's Finest Fireworks — Since Decades
+            India's Finest Fireworks — Since Decades
           </span>
         </div>
 
@@ -52,18 +52,23 @@ export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
         <div className="mb-4">
           <h1 className="font-display font-extrabold leading-[0.9] tracking-tight"
               style={{ fontSize: 'clamp(2.5rem, 8vw, 6rem)', color: '#f9f5fd' }}>
-            Here Comes The
+            BOOM Industries
           </h1>
           <div
             className="boom-headline font-display font-extrabold"
             style={{
-              fontSize: 'clamp(4rem, 14vw, 10rem)',
+              fontSize: 'clamp(3rem, 10vw, 7rem)',
               lineHeight: '0.85',
               letterSpacing: '-0.02em',
               animation: 'boom-pulse 4s ease-in-out infinite',
+              background: 'linear-gradient(135deg, #ef4444, #f5b800, #16a34a)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 15px rgba(245,184,0,0.3))'
             }}
           >
-            BOOM!
+            BFW FIREWORKS
           </div>
         </div>
 
@@ -72,20 +77,19 @@ export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
           className="font-body text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
           style={{ color: 'rgba(172,170,177,0.95)' }}
         >
-          Fireworks Manufacturers, Wholesalers & Retailers —
+          Lighting up your celebrations since decades.
           <br className="hidden sm:block" />
-          Lighting up Latur & beyond. All kinds of fireworks available!
+          Latur's premier fireworks manufacturers, wholesalers & retailers.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
-          <button onClick={onInquiryClick} className="btn-boom-primary text-base px-8 py-3.5">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 w-full sm:w-auto px-4 sm:px-0">
+          <button onClick={onInquiryClick} className="btn-boom-primary text-base px-8 py-3.5 w-full sm:w-auto">
             📞 Inquire Now
           </button>
-          <a href="/products" className="btn-boom-ghost text-base px-8 py-3.5">
+          <a href="/products" className="btn-boom-ghost text-base px-8 py-3.5 w-full sm:w-auto text-center">
             🎆 View Products
           </a>
-          <a href="/gallery" className="btn-boom-ghost text-base px-8 py-3.5">
+          <a href="/gallery" className="btn-boom-ghost text-base px-8 py-3.5 w-full sm:w-auto text-center">
             📸 See Gallery
           </a>
         </div>

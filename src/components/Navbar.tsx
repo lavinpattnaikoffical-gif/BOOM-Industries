@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X, Phone, Instagram } from 'lucide-react';
 import { useInquiryCart } from '@/contexts/InquiryContext';
 
 interface NavbarProps {
@@ -20,10 +20,11 @@ export default function Navbar({ onContactClick }: NavbarProps) {
   }, []);
 
   const navLinks = [
-    { label: 'Home',     href: '/' },
-    { label: 'Products', href: '/products', onClick: () => navigate('/products') },
-    { label: 'Gallery',  href: '/gallery',  onClick: () => navigate('/gallery') },
-    { label: 'Contact',  href: '#contact' },
+    { label: 'Home',          href: '/',               onClick: () => navigate('/') },
+    { label: 'Products',      href: '/products',       onClick: () => navigate('/products') },
+    { label: 'What We Offer', href: '/what-we-offer',  onClick: () => navigate('/what-we-offer') },
+    { label: 'Events',        href: '/media',          onClick: () => navigate('/media') },
+    { label: 'Contact',       href: '/contact',        onClick: () => navigate('/contact') },
   ];
 
   return (
@@ -49,49 +50,41 @@ export default function Navbar({ onContactClick }: NavbarProps) {
               className="text-[10px] font-body font-semibold tracking-[0.15em] uppercase"
               style={{ color: 'rgba(249,245,253,0.6)' }}
             >
-              Fireworks
+              Industries
             </span>
           </div>
         </a>
 
         {/* ── Desktop Nav ── */}
         <div className="hidden md:flex items-center gap-7">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(e) => {
-                if (link.onClick) { e.preventDefault(); link.onClick(); }
-              }}
-              className="text-sm font-display font-medium tracking-wide transition-colors duration-300"
-              style={{ color: 'rgba(172,170,177,1)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#f5b800')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(172,170,177,1)')}
-            >
-              {link.label}
-            </a>
-          ))}
+          <a href="/" className="text-sm font-display font-medium tracking-wide transition-colors duration-300 hover:text-[#f5b800]">Home</a>
+          <a href="/products" className="text-sm font-display font-medium tracking-wide transition-colors duration-300 hover:text-[#f5b800]">Products</a>
+          <a href="/what-we-offer" className="text-sm font-display font-medium tracking-wide transition-colors duration-300 hover:text-[#f5b800]">What We Offer</a>
+          <a href="/gallery" className="text-sm font-display font-medium tracking-wide transition-colors duration-300 hover:text-[#f5b800]">Events</a>
+          <a href="/contact" className="text-sm font-display font-medium tracking-wide transition-colors duration-300 hover:text-[#f5b800]">Contact</a>
         </div>
 
         {/* ── Desktop CTAs ── */}
         <div className="hidden md:flex items-center gap-3">
-          {/* Cart badge */}
-          {itemCount > 0 && (
-            <button
-              onClick={onContactClick}
-              className="relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-display font-semibold transition-all duration-300"
-              style={{
-                background: 'rgba(245,184,0,0.1)',
-                border: '1px solid rgba(245,184,0,0.3)',
-                color: '#f5b800',
-              }}
-            >
-              🛒 Inquiry ({itemCount})
-            </button>
-          )}
+          {/* Instagram Link */}
+          <a
+            href="https://instagram.com/boom_fireworks_official"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg text-sm font-display font-medium transition-all duration-300 hover:scale-110"
+            style={{
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              color: '#f87171',
+            }}
+            title="Follow us on Instagram"
+          >
+            <Instagram className="w-4 h-4" />
+          </a>
+          
           {/* Phone */}
           <a
-            href="tel:9922097669"
+            href="tel:9920976669"
             className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-display font-medium transition-all duration-300"
             style={{
               background: 'rgba(22,163,74,0.1)',
@@ -99,22 +92,39 @@ export default function Navbar({ onContactClick }: NavbarProps) {
               color: '#4ade80',
             }}
           >
-            <Phone className="w-3.5 h-3.5" /> 9922097669
+            <Phone className="w-3.5 h-3.5" /> 9920976669
           </a>
           {/* Get Quote CTA */}
-          <button onClick={onContactClick} className="btn-boom-primary text-sm">
+          <button onClick={onContactClick} className="btn-boom-primary text-sm px-5 py-2">
             Get Quote
           </button>
         </div>
 
-        {/* ── Mobile Menu Button ── */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden"
-          style={{ color: '#f5b800' }}
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* ── Mobile Actions ── */}
+        <div className="flex md:hidden items-center gap-4">
+          {itemCount > 0 && (
+            <button
+              onClick={onContactClick}
+              className="relative flex items-center justify-center w-10 h-10 rounded-lg text-sm transition-all duration-300"
+              style={{
+                background: 'rgba(245,184,0,0.1)',
+                border: '1px solid rgba(245,184,0,0.3)',
+                color: '#f5b800',
+              }}
+            >
+              🛒
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary text-black text-[10px] font-bold flex items-center justify-center">
+                {itemCount}
+              </span>
+            </button>
+          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{ color: '#f5b800' }}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* ── Mobile Menu ── */}

@@ -108,12 +108,12 @@ const ALL_PRODUCTS: Product[] = [
   },
 ];
 
-const CATEGORIES = ['All', 'Rockets', 'Fountains', 'Sparklers', 'Crackers'];
+const CATEGORIES = ['All', 'Factory', 'Bomb', 'Flower Pot', 'Chakkar', '9 cm'];
 const PRICE_RANGES = [
   { label: 'All Prices', min: 0, max: Infinity },
-  { label: '₹0 - ₹300', min: 0, max: 300 },
-  { label: '₹300 - ₹600', min: 300, max: 600 },
-  { label: '₹600+', min: 600, max: Infinity },
+  { label: '₹0 - ₹500', min: 0, max: 500 },
+  { label: '₹500 - ₹1000', min: 500, max: 1000 },
+  { label: '₹1000+', min: 1000, max: Infinity },
 ];
 
 interface ProductCardProps {
@@ -220,10 +220,9 @@ const ProductCard = ({ product, onAddToInquiry, isHovered, setIsHovered }: Produ
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onAddToInquiry(product)}
-            className="w-full py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary font-semibold text-sm hover:bg-primary/20 hover:border-primary/50 transition-all duration-300 flex items-center justify-center gap-2"
+            className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:glow-sm transition-all duration-300 flex items-center justify-center gap-2"
           >
-            <Plus className="w-4 h-4" />
-            Add to Inquiry
+            Inquire Now
           </motion.button>
         </div>
       </motion.div>
@@ -238,18 +237,20 @@ export default function Products() {
   const { addItem } = useInquiryCart();
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('All Prices');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('featured');
 
   // Filter products
-  let filtered = ALL_PRODUCTS.filter((p) => {
+  const filtered = ALL_PRODUCTS.filter((p) => {
     const categoryMatch = selectedCategory === 'All' || p.category === selectedCategory;
     const priceRange = PRICE_RANGES.find((r) => r.label === selectedPriceRange);
     const price = parseFloat(p.price.replace(/[^0-9.-]+/g, ''));
     const priceMatch = price >= priceRange!.min && price <= priceRange!.max;
-    return categoryMatch && priceMatch;
+    const searchMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return categoryMatch && priceMatch && searchMatch;
   });
 
   // Sort products

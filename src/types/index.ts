@@ -25,32 +25,16 @@ export interface InquirySubmissionResponse {
   timestamp: string;
 }
 
-// Admin Lead Type
-export interface Lead {
+// Admin User Type
+export interface AdminUser {
   id: string;
+  username: string;
   name: string;
-  phone: string;
-  city?: string;
-  requirement: string;
-  items: InquiryItem[];
+  role: 'superadmin' | 'admin';
   createdAt: string;
-  status?: 'new' | 'contacted' | 'converted' | 'closed';
-  notes?: string;
 }
 
-// Gallery Item
-export interface GalleryItem {
-  id: string;
-  type: 'image' | 'video';
-  title: string;
-  category: 'product' | 'event' | 'behind-scenes';
-  src: string;
-  thumbnail?: string;
-  videoId?: string; // For YouTube embeds
-  description?: string;
-}
-
-// Product Type (extended)
+// Product Type (extended for CRUD)
 export interface Product {
   id: string;
   name: string;
@@ -60,4 +44,35 @@ export interface Product {
   rating?: string;
   description?: string;
   inStock?: boolean;
+  createdAt?: string;
+}
+
+// Event Type (extended for CRUD)
+export interface EventItem {
+  id: string;
+  name: string;
+  description: string;
+  date: string;
+  location?: string;
+  image?: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  createdAt?: string;
+}
+
+// Inquiry Status
+export type InquiryStatus = 'new' | 'in-progress' | 'resolved' | 'closed';
+
+// Admin Lead Type
+export interface Lead {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  city?: string;
+  requirement: string;
+  items: InquiryItem[];
+  message?: string;
+  createdAt: string;
+  status: InquiryStatus;
+  notes?: string;
 }

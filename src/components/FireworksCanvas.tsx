@@ -1,264 +1,77 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
-// ── Burst pattern types ──
-type BurstType = 'peony' | 'chrysanthemum' | 'willow' | 'palm' | 'ring' | 'crackle' | 'double';
-
+// Realistic fireworks animation with proper physics and visual effects
 interface Particle {
   x: number;
   y: number;
   vx: number;
   vy: number;
-  life: number;
-  maxLife: number;
-  color: string;
+  alpha: number;
+  color: { h: number; s: number; l: number };
   size: number;
   decay: number;
   gravity: number;
-  trail: boolean;
-  sparkle: boolean;
+  brightness: number;
+  type: 'spark' | 'trail' | 'glow';
 }
 
-interface Firework {
+interface Rocket {
   x: number;
   y: number;
-  targetY: number;
-  vy: number;
   vx: number;
-  exploded: boolean;
-  particles: Particle[];
-  trailParticles: Particle[];
-  color: string;
-  secondaryColor: string;
-  burstType: BurstType;
-  hasSecondary: boolean;
-  secondaryTimer: number;
-  secondaryDone: boolean;
+  vy: number;
+  targetY: number;
+  hue: number;
+  trail: { x: number; y: number; alpha: number }[];
 }
 
-// ── Color palettes for each firework ──
-const PALETTES = [
-  { primary: [40, 95, 65], secondary: [50, 90, 70] },     // Gold → Bright Gold
-  { primary: [330, 90, 60], secondary: [340, 85, 75] },    // Magenta → Pink
-  { primary: [220, 80, 60], secondary: [200, 85, 70] },    // Blue → Cyan
-  { primary: [15, 90, 55], secondary: [30, 95, 65] },      // Orange → Gold
-  { primary: [0, 85, 55], secondary: [20, 90, 65] },       // Red → Orange
-  { primary: [280, 70, 60], secondary: [300, 75, 70] },    // Purple → Violet
-  { primary: [120, 60, 50], secondary: [80, 70, 60] },     // Green → Lime
-  { primary: [45, 100, 60], secondary: [35, 100, 70] },    // Amber → Light Amber
+interface Explosion {
+  x: number;
+  y: number;
+  particles: Particle[];
+  hue: number;
+  age: number;
+  type: 'peony' | 'dahlia' | 'willow' | 'palm' | 'crossette' | 'kamuro';
+}
+
+// Vibrant firework colors
+const FIREWORK_HUES = [
+  0,    // Red
+  30,   // Orange  
+  45,   // Gold
+  120,  // Green
+  200,  // Blue
+  280,  // Purple
+  330,  // Pink/Magenta
 ];
 
-const BURST_TYPES: BurstType[] = ['peony', 'chrysanthemum', 'willow', 'palm', 'ring', 'crackle', 'double'];
+function random(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
+}
 
-function hsl(h: number, s: number, l: number, a: number) {
+function randomInt(min: number, max: number): number {
+  return Math.floor(random(min, max + 1));
+}
+
+function hslToString(h: number, s: number, l: number, a: number): string {
   return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
 
 export default function FireworksCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fireworksRef = useRef<Firework[]>([]);
-  const lastSpawnRef = useRef(0);
-
-  const spawnFirework = useCallback((canvasW: number, canvasH: number) => {
-    const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)];
-    const burstType = BURST_TYPES[Math.floor(Math.random() * BURST_TYPES.length)];
-    const [ph, ps, pl] = palette.primary;
-    const [sh, ss, sl] = palette.secondary;
-
-    const startX = Math.random() * canvasW * 0.7 + canvasW * 0.15;
-    const drift = (Math.random() - 0.5) * 1.5;
-
-    fireworksRef.current.push({
-      x: startX,
-      y: canvasH + 10,
-      targetY: Math.random() * canvasH * 0.35 + canvasH * 0.08,
-      vy: -(10 + Math.random() * 5),
-      vx: drift,
-      exploded: false,
-      particles: [],
-      trailParticles: [],
-      color: `${ph},${ps},${pl}`,
-      secondaryColor: `${sh},${ss},${sl}`,
-      burstType,
-      hasSecondary: burstType === 'double' || Math.random() > 0.7,
-      secondaryTimer: 15 + Math.floor(Math.random() * 10),
-      secondaryDone: false,
-    });
-  }, []);
-
-  const explode = useCallback((fw: Firework) => {
-    const [h, s, l] = fw.color.split(',').map(Number);
-    const [h2, s2, l2] = fw.secondaryColor.split(',').map(Number);
-
-    const addParticle = (
-      angle: number,
-      speed: number,
-      life: number,
-      ch: number, cs: number, cl: number,
-      sizeBase: number,
-      decay: number,
-      gravity: number,
-      trail: boolean,
-      sparkle: boolean,
-    ) => {
-      fw.particles.push({
-        x: fw.x,
-        y: fw.y,
-        vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 0.5,
-        vy: Math.sin(angle) * speed + (Math.random() - 0.5) * 0.5,
-        life,
-        maxLife: life,
-        color: `${ch},${cs},${cl}`,
-        size: sizeBase + Math.random() * 1.2,
-        decay,
-        gravity,
-        trail,
-        sparkle,
-      });
-    };
-
-    switch (fw.burstType) {
-      case 'peony': {
-        // Classic spherical burst — dense, round
-        const count = 80 + Math.floor(Math.random() * 30);
-        for (let i = 0; i < count; i++) {
-          const angle = Math.PI * 2 * (i / count) + (Math.random() - 0.5) * 0.2;
-          const speed = 2.5 + Math.random() * 3.5;
-          const life = 45 + Math.random() * 25;
-          addParticle(angle, speed, life, h, s, l, 2, 0.975, 0.025, false, false);
-        }
-        break;
-      }
-      case 'chrysanthemum': {
-        // Long trailing tendrils
-        const count = 100 + Math.floor(Math.random() * 40);
-        for (let i = 0; i < count; i++) {
-          const angle = Math.PI * 2 * (i / count) + (Math.random() - 0.5) * 0.15;
-          const speed = 3 + Math.random() * 4;
-          const life = 60 + Math.random() * 35;
-          addParticle(angle, speed, life, h, s, l, 1.8, 0.985, 0.018, true, false);
-        }
-        break;
-      }
-      case 'willow': {
-        // Heavy gravity, drooping trails
-        const count = 70 + Math.floor(Math.random() * 20);
-        for (let i = 0; i < count; i++) {
-          const angle = Math.PI * 2 * (i / count) + (Math.random() - 0.5) * 0.25;
-          const speed = 2 + Math.random() * 3;
-          const life = 80 + Math.random() * 40;
-          addParticle(angle, speed, life, h, s, Math.min(l + 15, 85), 1.5, 0.99, 0.04, true, false);
-        }
-        break;
-      }
-      case 'palm': {
-        // Fan-shaped upward burst
-        const count = 50 + Math.floor(Math.random() * 20);
-        for (let i = 0; i < count; i++) {
-          const angle = -Math.PI * 0.8 + (Math.PI * 0.6 * i) / count + (Math.random() - 0.5) * 0.3;
-          const speed = 3 + Math.random() * 4;
-          const life = 55 + Math.random() * 30;
-          addParticle(angle, speed, life, h, s, l, 2.2, 0.98, 0.035, true, false);
-        }
-        break;
-      }
-      case 'ring': {
-        // Perfect ring shape with inner sparkles
-        const count = 60;
-        for (let i = 0; i < count; i++) {
-          const angle = (Math.PI * 2 * i) / count;
-          const speed = 3.5 + Math.random() * 0.5;
-          const life = 40 + Math.random() * 15;
-          addParticle(angle, speed, life, h, s, l, 2.5, 0.97, 0.02, false, false);
-        }
-        // Inner sparkles
-        for (let i = 0; i < 25; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = 0.5 + Math.random() * 1.5;
-          const life = 30 + Math.random() * 20;
-          addParticle(angle, speed, life, h2, s2, l2, 1, 0.96, 0.015, false, true);
-        }
-        break;
-      }
-      case 'crackle': {
-        // Initial burst then sparkling crackle particles
-        const count = 40;
-        for (let i = 0; i < count; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = 2 + Math.random() * 3;
-          const life = 35 + Math.random() * 20;
-          addParticle(angle, speed, life, h, s, l, 1.5, 0.97, 0.025, false, true);
-        }
-        // Extra sparkle burst
-        for (let i = 0; i < 50; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = 1 + Math.random() * 2.5;
-          const life = 50 + Math.random() * 30;
-          addParticle(angle, speed, life, 45, 100, 80, 1, 0.98, 0.02, false, true);
-        }
-        break;
-      }
-      case 'double': {
-        // Two concentric rings
-        const outerCount = 60;
-        for (let i = 0; i < outerCount; i++) {
-          const angle = (Math.PI * 2 * i) / outerCount;
-          const speed = 4 + Math.random() * 1;
-          const life = 50 + Math.random() * 20;
-          addParticle(angle, speed, life, h, s, l, 2, 0.975, 0.022, false, false);
-        }
-        const innerCount = 40;
-        for (let i = 0; i < innerCount; i++) {
-          const angle = (Math.PI * 2 * i) / innerCount;
-          const speed = 1.5 + Math.random() * 1;
-          const life = 40 + Math.random() * 15;
-          addParticle(angle, speed, life, h2, s2, l2, 1.8, 0.97, 0.02, false, false);
-        }
-        break;
-      }
-    }
-
-    fw.exploded = true;
-  }, []);
-
-  const spawnSecondary = useCallback((fw: Firework) => {
-    const [h2, s2, l2] = fw.secondaryColor.split(',').map(Number);
-    // Pick random living particles as secondary burst centers
-    const aliveParticles = fw.particles.filter(p => p.life > p.maxLife * 0.3);
-    const centers = aliveParticles
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3 + Math.floor(Math.random() * 4));
-
-    centers.forEach(center => {
-      const count = 8 + Math.floor(Math.random() * 8);
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.8 + Math.random() * 1.5;
-        const life = 20 + Math.random() * 15;
-        fw.particles.push({
-          x: center.x,
-          y: center.y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          life,
-          maxLife: life,
-          color: `${h2},${s2},${Math.min(l2 + 10, 90)}`,
-          size: 1 + Math.random(),
-          decay: 0.96,
-          gravity: 0.02,
-          trail: false,
-          sparkle: true,
-        });
-      }
-    });
-    fw.secondaryDone = true;
-  }, []);
+  const rockets = useRef<Rocket[]>([]);
+  const explosions = useRef<Explosion[]>([]);
+  const animationId = useRef<number>(0);
+  const lastLaunch = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
-    let animId: number;
+    
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
 
+    // Set canvas size
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -266,169 +79,360 @@ export default function FireworksCanvas() {
     resize();
     window.addEventListener('resize', resize);
 
-    const loop = (time: number) => {
-      // Fade trail — creates light persistence
-      ctx.fillStyle = 'rgba(7, 7, 15, 0.12)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Launch a new rocket
+    const launchRocket = () => {
+      const hue = FIREWORK_HUES[randomInt(0, FIREWORK_HUES.length - 1)];
+      rockets.current.push({
+        x: random(canvas.width * 0.1, canvas.width * 0.9),
+        y: canvas.height + 10,
+        vx: random(-1, 1),
+        vy: random(-14, -10),
+        targetY: random(canvas.height * 0.1, canvas.height * 0.35),
+        hue,
+        trail: [],
+      });
+    };
 
-      // Spawn new fireworks
-      if (time - lastSpawnRef.current > 500 + Math.random() * 700) {
-        spawnFirework(canvas.width, canvas.height);
-        if (Math.random() > 0.4) {
-          setTimeout(() => spawnFirework(canvas.width, canvas.height), 100 + Math.random() * 200);
-        }
-        if (Math.random() > 0.75) {
-          setTimeout(() => spawnFirework(canvas.width, canvas.height), 250 + Math.random() * 300);
-        }
-        lastSpawnRef.current = time;
-      }
-
-      fireworksRef.current = fireworksRef.current.filter((fw) => {
-        if (!fw.exploded) {
-          // ── Rising rocket ──
-          fw.y += fw.vy;
-          fw.x += fw.vx;
-          fw.vy += 0.05;
-
-          // Bright rocket head
-          const rocketGlow = 6;
-          const [rh, rs, rl] = fw.color.split(',').map(Number);
-          const gradient = ctx.createRadialGradient(fw.x, fw.y, 0, fw.x, fw.y, rocketGlow);
-          gradient.addColorStop(0, hsl(rh, rs, 95, 1));
-          gradient.addColorStop(0.3, hsl(rh, rs, rl + 20, 0.8));
-          gradient.addColorStop(1, hsl(rh, rs, rl, 0));
-          ctx.beginPath();
-          ctx.arc(fw.x, fw.y, rocketGlow, 0, Math.PI * 2);
-          ctx.fillStyle = gradient;
-          ctx.fill();
-
-          // Dense trail behind rocket
-          for (let t = 0; t < 4; t++) {
-            fw.trailParticles.push({
-              x: fw.x + (Math.random() - 0.5) * 3,
-              y: fw.y + Math.random() * 4,
-              vx: (Math.random() - 0.5) * 0.8,
-              vy: 0.5 + Math.random() * 2,
-              life: 18 + Math.random() * 10,
-              maxLife: 28,
-              color: fw.color,
-              size: 1 + Math.random() * 1.5,
-              decay: 0.95,
-              gravity: 0.01,
-              trail: false,
-              sparkle: Math.random() > 0.6,
+    // Create explosion at position
+    const createExplosion = (x: number, y: number, hue: number) => {
+      const types: Explosion['type'][] = ['peony', 'dahlia', 'willow', 'palm', 'crossette', 'kamuro'];
+      const type = types[randomInt(0, types.length - 1)];
+      const particles: Particle[] = [];
+      
+      // Different explosion patterns
+      switch (type) {
+        case 'peony': {
+          // Classic spherical burst
+          const count = randomInt(80, 120);
+          for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + random(-0.1, 0.1);
+            const speed = random(2, 6);
+            const colorVariation = random(-15, 15);
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              alpha: 1,
+              color: { h: hue + colorVariation, s: 100, l: random(55, 70) },
+              size: random(2, 3.5),
+              decay: random(0.015, 0.02),
+              gravity: 0.05,
+              brightness: 1,
+              type: 'spark',
             });
           }
-
-          if (fw.y <= fw.targetY) {
-            explode(fw);
+          break;
+        }
+        case 'dahlia': {
+          // Dense center with long streaks
+          const streakCount = randomInt(12, 18);
+          for (let i = 0; i < streakCount; i++) {
+            const baseAngle = (Math.PI * 2 * i) / streakCount;
+            // Multiple particles per streak
+            for (let j = 0; j < 8; j++) {
+              const speed = 1 + j * 0.6;
+              particles.push({
+                x, y,
+                vx: Math.cos(baseAngle) * speed,
+                vy: Math.sin(baseAngle) * speed,
+                alpha: 1,
+                color: { h: hue, s: 100, l: 60 + j * 3 },
+                size: 3 - j * 0.2,
+                decay: 0.012,
+                gravity: 0.03,
+                brightness: 1 - j * 0.08,
+                type: 'spark',
+              });
+            }
           }
+          // Add sparkle center
+          for (let i = 0; i < 30; i++) {
+            const angle = random(0, Math.PI * 2);
+            const speed = random(0.5, 2);
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              alpha: 1,
+              color: { h: hue + 30, s: 80, l: 80 },
+              size: random(1, 2),
+              decay: 0.025,
+              gravity: 0.02,
+              brightness: random(0.8, 1),
+              type: 'glow',
+            });
+          }
+          break;
+        }
+        case 'willow': {
+          // Long drooping trails like a willow tree
+          const count = randomInt(60, 80);
+          for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + random(-0.05, 0.05);
+            const speed = random(2, 4);
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              alpha: 1,
+              color: { h: 45, s: 100, l: 70 }, // Golden willow
+              size: random(1.5, 2.5),
+              decay: 0.006, // Very slow decay for long trails
+              gravity: 0.08, // Heavy gravity for drooping effect
+              brightness: 1,
+              type: 'trail',
+            });
+          }
+          break;
+        }
+        case 'palm': {
+          // Palm tree shape - upward burst with drooping ends
+          const fronds = randomInt(8, 12);
+          for (let i = 0; i < fronds; i++) {
+            const baseAngle = -Math.PI / 2 + random(-0.8, 0.8); // Mostly upward
+            for (let j = 0; j < 12; j++) {
+              const speed = 2 + j * 0.4;
+              const spread = j * 0.03;
+              particles.push({
+                x, y,
+                vx: Math.cos(baseAngle + random(-spread, spread)) * speed,
+                vy: Math.sin(baseAngle + random(-spread, spread)) * speed,
+                alpha: 1,
+                color: { h: hue, s: 100, l: 55 + j * 2 },
+                size: random(2, 3),
+                decay: 0.01,
+                gravity: 0.06 + j * 0.005,
+                brightness: 1 - j * 0.05,
+                type: 'trail',
+              });
+            }
+          }
+          break;
+        }
+        case 'crossette': {
+          // Bursts that split into smaller bursts
+          const mainCount = randomInt(20, 30);
+          for (let i = 0; i < mainCount; i++) {
+            const angle = (Math.PI * 2 * i) / mainCount;
+            const speed = random(3, 5);
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              alpha: 1,
+              color: { h: hue, s: 100, l: 65 },
+              size: random(2.5, 4),
+              decay: 0.02,
+              gravity: 0.04,
+              brightness: 1,
+              type: 'spark',
+            });
+          }
+          // Secondary smaller bursts
+          for (let i = 0; i < 40; i++) {
+            const angle = random(0, Math.PI * 2);
+            const speed = random(1, 3);
+            particles.push({
+              x: x + random(-20, 20),
+              y: y + random(-20, 20),
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              alpha: 1,
+              color: { h: hue + 180, s: 100, l: 70 }, // Complementary color
+              size: random(1, 2),
+              decay: 0.018,
+              gravity: 0.03,
+              brightness: 1,
+              type: 'glow',
+            });
+          }
+          break;
+        }
+        case 'kamuro': {
+          // Japanese-style dense golden cascade
+          const count = randomInt(150, 200);
+          for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + random(-0.2, 0.2);
+            const speed = random(1, 5);
+            particles.push({
+              x, y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              alpha: 1,
+              color: { h: 45, s: 100, l: random(60, 85) }, // Bright gold
+              size: random(1, 2.5),
+              decay: 0.008,
+              gravity: 0.065,
+              brightness: random(0.7, 1),
+              type: 'trail',
+            });
+          }
+          break;
+        }
+      }
+      
+      explosions.current.push({ x, y, particles, hue, age: 0, type });
+    };
+
+    // Main animation loop
+    const animate = (time: number) => {
+      // Create fade effect for trails
+      ctx.fillStyle = 'rgba(14, 14, 19, 0.18)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Auto-launch rockets
+      if (time - lastLaunch.current > random(800, 1500)) {
+        launchRocket();
+        // Sometimes launch multiple
+        if (Math.random() > 0.6) {
+          setTimeout(launchRocket, random(100, 300));
+        }
+        lastLaunch.current = time;
+      }
+
+      // Update and draw rockets
+      rockets.current = rockets.current.filter(rocket => {
+        // Update position
+        rocket.x += rocket.vx;
+        rocket.y += rocket.vy;
+        rocket.vy += 0.04; // Gravity
+
+        // Add to trail
+        rocket.trail.push({ x: rocket.x, y: rocket.y, alpha: 1 });
+        if (rocket.trail.length > 20) {
+          rocket.trail.shift();
         }
 
-        // ── Trail particles ──
-        fw.trailParticles = fw.trailParticles.filter((p) => {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += p.gravity;
-          p.vx *= p.decay;
-          p.life--;
-          const alpha = p.life / p.maxLife;
-          const [ph, ps, pl] = p.color.split(',').map(Number);
-
-          if (p.sparkle && Math.random() > 0.5) {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * alpha * 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = hsl(ph, ps, Math.min(pl + 30, 95), alpha * 0.8);
-            ctx.fill();
-          }
-
+        // Draw trail
+        rocket.trail.forEach((point, i) => {
+          const alpha = (i / rocket.trail.length) * point.alpha * 0.6;
+          const size = 1 + (i / rocket.trail.length) * 2;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-          ctx.fillStyle = hsl(ph, ps, pl, alpha * 0.7);
+          ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+          ctx.fillStyle = hslToString(rocket.hue, 100, 70, alpha);
           ctx.fill();
-          return p.life > 0;
+          point.alpha *= 0.95;
         });
 
-        // ── Secondary burst timer ──
-        if (fw.exploded && fw.hasSecondary && !fw.secondaryDone) {
-          fw.secondaryTimer--;
-          if (fw.secondaryTimer <= 0) {
-            spawnSecondary(fw);
-          }
+        // Draw rocket head with glow
+        const gradient = ctx.createRadialGradient(
+          rocket.x, rocket.y, 0,
+          rocket.x, rocket.y, 12
+        );
+        gradient.addColorStop(0, hslToString(rocket.hue, 100, 95, 1));
+        gradient.addColorStop(0.3, hslToString(rocket.hue, 100, 70, 0.8));
+        gradient.addColorStop(1, hslToString(rocket.hue, 100, 50, 0));
+        
+        ctx.beginPath();
+        ctx.arc(rocket.x, rocket.y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Bright core
+        ctx.beginPath();
+        ctx.arc(rocket.x, rocket.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+
+        // Check if should explode
+        if (rocket.vy >= 0 || rocket.y <= rocket.targetY) {
+          // Create flash effect
+          ctx.save();
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = hslToString(rocket.hue, 100, 80, 1);
+          ctx.beginPath();
+          ctx.arc(rocket.x, rocket.y, 100, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          
+          createExplosion(rocket.x, rocket.y, rocket.hue);
+          return false;
         }
 
-        // ── Explosion particles ──
-        fw.particles = fw.particles.filter((p) => {
-          p.vx *= p.decay;
-          p.vy *= p.decay;
+        return true;
+      });
+
+      // Update and draw explosions
+      explosions.current = explosions.current.filter(explosion => {
+        explosion.age++;
+        
+        explosion.particles = explosion.particles.filter(p => {
+          // Update physics
+          p.vx *= 0.99;
+          p.vy *= 0.99;
           p.vy += p.gravity;
           p.x += p.vx;
           p.y += p.vy;
-          p.life--;
-          const alpha = p.life / p.maxLife;
-          const [ph, ps, pl] = p.color.split(',').map(Number);
+          p.alpha -= p.decay;
+          p.brightness *= 0.995;
 
-          // Trail effect — draw faded copies behind
-          if (p.trail && alpha > 0.2) {
-            for (let t = 1; t <= 3; t++) {
-              const tx = p.x - p.vx * t * 1.5;
-              const ty = p.y - p.vy * t * 1.5;
-              const ta = alpha * (0.3 / t);
+          if (p.alpha <= 0) return false;
+
+          const { h, s, l } = p.color;
+          
+          // Draw based on particle type
+          if (p.type === 'trail' && p.alpha > 0.1) {
+            // Draw motion trail
+            for (let i = 1; i <= 4; i++) {
+              const trailX = p.x - p.vx * i * 1.5;
+              const trailY = p.y - p.vy * i * 1.5;
+              const trailAlpha = p.alpha * (0.25 / i);
               ctx.beginPath();
-              ctx.arc(tx, ty, p.size * alpha * 0.7, 0, Math.PI * 2);
-              ctx.fillStyle = hsl(ph, ps, pl, ta);
+              ctx.arc(trailX, trailY, p.size * 0.7, 0, Math.PI * 2);
+              ctx.fillStyle = hslToString(h, s, l - 10, trailAlpha);
               ctx.fill();
             }
           }
 
-          // Sparkle flicker
-          if (p.sparkle) {
-            const flicker = Math.sin(p.life * 0.8) * 0.5 + 0.5;
-            const sparkleSize = p.size * alpha * (0.5 + flicker * 1.5);
+          // Outer glow
+          if (p.brightness > 0.5) {
             ctx.beginPath();
-            ctx.arc(p.x, p.y, sparkleSize, 0, Math.PI * 2);
-            ctx.fillStyle = hsl(ph, Math.min(ps + 10, 100), Math.min(pl + 20, 95), alpha * flicker);
+            ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+            ctx.fillStyle = hslToString(h, s, l, p.alpha * 0.15);
             ctx.fill();
           }
 
           // Main particle
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-          ctx.fillStyle = hsl(ph, ps, pl, alpha);
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = hslToString(h, s, l * p.brightness, p.alpha);
           ctx.fill();
 
-          // Glow halo for brighter particles
-          if (alpha > 0.25) {
+          // Bright center for fresh particles
+          if (p.alpha > 0.6) {
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * 3.5 * alpha, 0, Math.PI * 2);
-            ctx.fillStyle = hsl(ph, ps, Math.min(pl + 10, 85), alpha * 0.12);
+            ctx.arc(p.x, p.y, p.size * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = hslToString(h, s - 20, Math.min(l + 25, 95), p.alpha);
             ctx.fill();
           }
 
-          // Bright core for fresh particles
-          if (alpha > 0.7) {
+          // Sparkle effect for glow type
+          if (p.type === 'glow' && Math.random() > 0.7) {
+            const sparkleSize = p.size * random(0.5, 1.5);
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
-            ctx.fillStyle = hsl(ph, ps - 20, Math.min(pl + 35, 98), alpha);
+            ctx.arc(p.x, p.y, sparkleSize, 0, Math.PI * 2);
+            ctx.fillStyle = hslToString(h, s, 90, p.alpha * random(0.5, 1));
             ctx.fill();
           }
 
-          return p.life > 0;
+          return true;
         });
 
-        return !fw.exploded || fw.particles.length > 0 || fw.trailParticles.length > 0;
+        return explosion.particles.length > 0;
       });
 
-      animId = requestAnimationFrame(loop);
+      animationId.current = requestAnimationFrame(animate);
     };
 
-    animId = requestAnimationFrame(loop);
+    // Start animation
+    animationId.current = requestAnimationFrame(animate);
 
+    // Cleanup
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(animationId.current);
       window.removeEventListener('resize', resize);
     };
-  }, [spawnFirework, explode, spawnSecondary]);
+  }, []);
 
   return (
     <canvas

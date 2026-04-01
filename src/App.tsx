@@ -8,11 +8,14 @@ import { InquiryProvider } from "@/contexts/InquiryContext";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import PageLoader from "./components/PageLoader.tsx";
+import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton.tsx";
 
 // Lazy load pages for better performance
 const Products = lazy(() => import("./pages/Products.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
+const WhatWeOffer = lazy(() => import("./pages/WhatWeOffer.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -50,8 +53,25 @@ const App = () => (
               }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route
+              path="/what-we-offer"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <WhatWeOffer />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Contact />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppFloatingButton />
         </BrowserRouter>
       </TooltipProvider>
     </InquiryProvider>

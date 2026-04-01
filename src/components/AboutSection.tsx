@@ -28,7 +28,7 @@ export default function AboutSection() {
             >
               <img
                 src={aboutImg}
-                alt="Boom Fireworks manufacturing"
+                alt="Boom Industries manufacturing"
                 className="w-full object-cover"
                 style={{ height: '440px' }}
               />
@@ -44,64 +44,54 @@ export default function AboutSection() {
           </div>
 
           {/* Content */}
-          <div>
-            <div className="reveal">
-              <span className="text-xs font-display font-bold tracking-widest uppercase" style={{ color: '#f5b800' }}>
-                About BOOM Fireworks
-              </span>
-              <h2 className="font-display font-bold mt-3 mb-4 leading-[1.1]"
-                  style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#f9f5fd' }}>
-                Latur's Most Trusted
-                <br />
-                <span style={{
-                  background: 'linear-gradient(135deg, #ef4444, #f5b800)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>
-                  Fireworks Store
-                </span>
-              </h2>
-              <p className="font-body leading-relaxed mb-5 max-w-lg"
-                 style={{ color: 'rgba(172,170,177,0.95)', fontSize: '1rem' }}>
-                Based in Gunigolai, Latur, Boom Fireworks is your one-stop destination for all kinds of fireworks.
-                We are manufacturers, wholesalers, traders, and retailers — offering the best prices directly to customers.
+          <div className="reveal">
+            <span className="text-xs font-display font-bold tracking-widest uppercase" style={{ color: '#f5b800' }}>
+              Our Legacy
+            </span>
+            <h2 className="font-display font-bold mt-3 mb-4 leading-[1.1]"
+                style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#f9f5fd' }}>
+              Lighting up your <br />
+              <span style={{
+                background: 'linear-gradient(135deg, #ef4444, #f5b800)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>
+                Celebrations
+              </span> Since Decades
+            </h2>
+            <div className="space-y-4 font-body leading-relaxed mb-8" style={{ color: 'rgba(172,170,177,0.95)', fontSize: '1rem' }}>
+              <p>
+                Welcome to <strong style={{ color: '#f9f5fd' }}>BOOM Industries (BFW)</strong>, Latur's most trusted name in the world of pyrotechnics. For decades, we have been at the forefront of manufacturing and supplying high-quality fireworks that make every occasion unforgettable.
               </p>
-              <p className="font-body leading-relaxed mb-8"
-                 style={{ color: 'rgba(172,170,177,0.8)', fontSize: '0.95rem' }}>
-                From small retail purchases to large wholesale bulk orders and event celebrations — we cater to all.
-                Trusted by 1,000+ customers across Latur and surrounding districts.
+              <p>
+                Our commitment to safety, innovation, and "The Big Boom" has made us the preferred choice for thousands of families and event organizers across the region.
               </p>
+            </div>
 
-              {/* Contact info */}
-              <div className="flex flex-wrap gap-3 mb-8">
-                <a href="tel:9922097669"
-                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-display font-semibold text-sm"
-                   style={{ background: 'rgba(22,163,74,0.12)', border: '1px solid rgba(22,163,74,0.3)', color: '#4ade80' }}>
-                  📞 9922097669
-                </a>
-                <a href="https://instagram.com/boom_fireworks_official" target="_blank" rel="noopener noreferrer"
-                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-display font-semibold text-sm"
-                   style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
-                  📸 @boom_fireworks_official
-                </a>
+            {/* Contact info */}
+            <div className="flex flex-wrap gap-3 mb-10">
+              <a href="tel:9922097669"
+                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-display font-semibold text-sm"
+                 style={{ background: 'rgba(22,163,74,0.12)', border: '1px solid rgba(22,163,74,0.3)', color: '#4ade80' }}>
+                📞 9922097669
+              </a>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-display font-semibold text-sm"
+                   style={{ background: 'rgba(245,184,0,0.12)', border: '1px solid rgba(245,184,0,0.3)', color: '#f5b800' }}>
+                📍 Latur, Maharashtra
               </div>
             </div>
 
-            {/* Stats */}
+            {/* Trust Indicators */}
             <div className="grid grid-cols-2 gap-4 stagger-children">
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="reveal boom-card p-4 rounded-xl"
-                  style={{ border: `1px solid ${stat.color}20` }}
-                >
-                  <div className="font-display font-bold text-3xl mb-0.5" style={{ color: stat.color }}>
-                    <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                  </div>
-                  <div className="text-xs font-body" style={{ color: 'rgba(172,170,177,0.8)' }}>{stat.label}</div>
-                </div>
-              ))}
+              <div className="p-4 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                <div className="text-3xl font-display font-bold mb-1" style={{ color: '#ef4444' }}>1000+</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold opacity-60">Happy Customers</div>
+              </div>
+              <div className="p-4 rounded-xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                <div className="text-3xl font-display font-bold mb-1" style={{ color: '#f5b800' }}>30+</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold opacity-60">Years Experience</div>
+              </div>
             </div>
           </div>
         </div>

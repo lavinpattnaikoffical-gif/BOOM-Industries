@@ -12,10 +12,6 @@ const requirements = [
   { value: 'retail',       label: '🛒 Retail Purchase' },
   { value: 'bulk',         label: '📦 Bulk / Wholesale Order' },
   { value: 'event',        label: '🎆 Event / Celebration' },
-  { value: 'diwali',       label: '🪔 Diwali Stock' },
-  { value: 'wedding',      label: '💍 Wedding Celebration' },
-  { value: 'dealer',       label: '🤝 Dealer Inquiry' },
-  { value: 'other',        label: '📋 Other' },
 ];
 
 export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
