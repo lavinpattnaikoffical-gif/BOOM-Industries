@@ -30,7 +30,7 @@ export interface AdminUser {
   id: string;
   username: string;
   name: string;
-  role: 'superadmin' | 'admin';
+  role: 'super' | 'regular';
   createdAt: string;
 }
 

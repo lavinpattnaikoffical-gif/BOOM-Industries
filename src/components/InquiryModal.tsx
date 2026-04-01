@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Phone, User, MapPin, Package, Loader2, CheckCircle } from 'lucide-react';
+import { X, Phone, User, MapPin, Package, Loader2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+// WhatsApp business number (update with your number)
+const WHATSAPP_NUMBER = '919876543210';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -18,7 +21,6 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
   const [form, setForm] = useState({ name: '', phone: '', city: '', requirement: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
 
   // Close on ESC
@@ -55,21 +57,29 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setSubmitting(true);
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 1500));
-    setSubmitting(false);
-    setSubmitted(true);
+
+    // Build WhatsApp message
+    let message = `*New Inquiry*\n\n`;
+    message += `*Name:* ${form.name}\n`;
+    message += `*Phone:* ${form.phone}\n`;
+    if (form.city) message += `*City:* ${form.city}\n`;
+    if (form.requirement) {
+      const reqLabel = requirements.find(r => r.value === form.requirement)?.label || form.requirement;
+      message += `*Requirement:* ${reqLabel}`;
+    }
+
+    // Open WhatsApp
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
 
     toast({
-      title: '🎆 Inquiry Received!',
-      description: `Thank you ${form.name}! We'll contact you at ${form.phone} shortly.`,
+      title: '🎆 Redirecting to WhatsApp!',
+      description: 'Complete your inquiry on WhatsApp for instant response.',
     });
 
-    setTimeout(() => {
-      setSubmitted(false);
-      setForm({ name: '', phone: '', city: '', requirement: '' });
-      onClose();
-    }, 2500);
+    setForm({ name: '', phone: '', city: '', requirement: '' });
+    setSubmitting(false);
+    onClose();
   };
 
   return (
@@ -104,122 +114,108 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
 
         {/* Body */}
         <div className="p-6">
-          {submitted ? (
-            // Success state
-            <div className="text-center py-8">
-              <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#16a34a' }} />
-              <h3 className="font-display font-bold text-xl mb-2" style={{ color: '#f9f5fd' }}>
-                Inquiry Sent! 🎉
-              </h3>
-              <p className="font-body" style={{ color: 'rgba(172,170,177,0.9)' }}>
-                Thank you, <strong style={{ color: '#f5b800' }}>{form.name}</strong>!<br />
-                We'll call you at <strong style={{ color: '#4ade80' }}>{form.phone}</strong> shortly.
-              </p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: '#f9f5fd' }}>
+                <User className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#f5b800' }} />
+                Your Name <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="e.g. Rajesh Kumar"
+                className="boom-input"
+                autoComplete="off"
+              />
+              {errors.name && (
+                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.name}</p>
+              )}
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
-              <div>
-                <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: '#f9f5fd' }}>
-                  <User className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#f5b800' }} />
-                  Your Name <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="e.g. Rajesh Kumar"
-                  className="boom-input"
-                  autoComplete="off"
-                />
-                {errors.name && (
-                  <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.name}</p>
-                )}
-              </div>
 
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: '#f9f5fd' }}>
-                  <Phone className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#f5b800' }} />
-                  Phone Number <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <input
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="e.g. 9876543210"
-                  type="tel"
-                  className="boom-input"
-                  inputMode="numeric"
-                  maxLength={10}
-                />
-                {errors.phone && (
-                  <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.phone}</p>
-                )}
-              </div>
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: '#f9f5fd' }}>
+                <Phone className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#f5b800' }} />
+                Phone Number <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="e.g. 9876543210"
+                type="tel"
+                className="boom-input"
+                inputMode="numeric"
+                maxLength={10}
+              />
+              {errors.phone && (
+                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.phone}</p>
+              )}
+            </div>
 
-              {/* City (optional) */}
-              <div>
-                <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: 'rgba(172,170,177,0.85)' }}>
-                  <MapPin className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#acaab1' }} />
-                  City <span className="text-xs font-normal">(optional)</span>
-                </label>
-                <input
-                  name="city"
-                  value={form.city}
-                  onChange={handleChange}
-                  placeholder="e.g. Latur, Nanded, Aurangabad..."
-                  className="boom-input"
-                />
-              </div>
+            {/* City (optional) */}
+            <div>
+              <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: 'rgba(172,170,177,0.85)' }}>
+                <MapPin className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#acaab1' }} />
+                City <span className="text-xs font-normal">(optional)</span>
+              </label>
+              <input
+                name="city"
+                value={form.city}
+                onChange={handleChange}
+                placeholder="e.g. Latur, Nanded, Aurangabad..."
+                className="boom-input"
+              />
+            </div>
 
-              {/* Requirement dropdown */}
-              <div>
-                <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: 'rgba(172,170,177,0.85)' }}>
-                  <Package className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#acaab1' }} />
-                  Requirement Type <span className="text-xs font-normal">(optional)</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="requirement"
-                    value={form.requirement}
-                    onChange={handleChange}
-                    className="boom-select"
-                  >
-                    {requirements.map(r => (
-                      <option key={r.value} value={r.value}>{r.label}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                       style={{ color: '#acaab1' }}>
-                    ▾
-                  </div>
+            {/* Requirement dropdown */}
+            <div>
+              <label className="block text-sm font-display font-semibold mb-1.5" style={{ color: 'rgba(172,170,177,0.85)' }}>
+                <Package className="w-3.5 h-3.5 inline mr-1.5 mb-0.5" style={{ color: '#acaab1' }} />
+                Requirement Type <span className="text-xs font-normal">(optional)</span>
+              </label>
+              <div className="relative">
+                <select
+                  name="requirement"
+                  value={form.requirement}
+                  onChange={handleChange}
+                  className="boom-select"
+                >
+                  {requirements.map(r => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                     style={{ color: '#acaab1' }}>
+                  ▾
                 </div>
               </div>
+            </div>
 
-              {/* Submit */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full btn-boom-primary py-3.5 text-base"
-                  style={{ opacity: submitting ? 0.7 : 1, cursor: submitting ? 'not-allowed' : 'pointer' }}
-                >
-                  {submitting ? (
-                    <><Loader2 className="w-5 h-5 animate-spin" /> Sending Inquiry...</>
-                  ) : (
-                    '📨 Send Inquiry'
-                  )}
-                </button>
-              </div>
+            {/* Submit */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full btn-boom-primary py-3.5 text-base flex items-center justify-center gap-2"
+                style={{ opacity: submitting ? 0.7 : 1, cursor: submitting ? 'not-allowed' : 'pointer' }}
+              >
+                {submitting ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Sending...</>
+                ) : (
+                  <><MessageSquare className="w-5 h-5" /> Send via WhatsApp</>
+                )}
+              </button>
+            </div>
 
-              {/* Note */}
-              <p className="text-center text-xs font-body" style={{ color: 'rgba(172,170,177,0.65)' }}>
-                📞 Or call us directly:{' '}
-                <a href="tel:9922097669" style={{ color: '#4ade80' }}>9922097669</a>
-              </p>
-            </form>
-          )}
+            {/* Note */}
+            <p className="text-center text-xs font-body" style={{ color: 'rgba(172,170,177,0.65)' }}>
+              📞 Or call us directly:{' '}
+              <a href="tel:9922097669" style={{ color: '#4ade80' }}>9922097669</a>
+            </p>
+          </form>
         </div>
       </div>
     </div>

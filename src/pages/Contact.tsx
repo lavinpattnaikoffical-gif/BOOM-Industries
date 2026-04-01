@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Instagram, Send, MessageSquare, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { submitInquiry } from '@/api/inquiries';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SparkCursor from '@/components/SparkCursor';
 import EmberParticles from '@/components/EmberParticles';
+
+// WhatsApp business number (update with your number)
+const WHATSAPP_NUMBER = '919876543210';
 
 export default function Contact() {
   const { toast } = useToast();
@@ -21,24 +23,20 @@ export default function Contact() {
     }
 
     setLoading(true);
-    try {
-      await submitInquiry({
-        ...form,
-        requirement: 'General Inquiry',
-        items: []
-      } as any);
+    
+    // Build WhatsApp message
+    let message = `*Contact Form Inquiry*\n\n`;
+    message += `*Name:* ${form.name}\n`;
+    message += `*Phone:* ${form.phone}\n`;
+    if (form.message) message += `*Message:* ${form.message}`;
 
-      toast({ title: 'Message Sent!', description: 'Redirecting to WhatsApp...' });
-      
-      const whatsappMsg = encodeURIComponent(`Hello! I'm ${form.name}. ${form.message} (Contact: ${form.phone})`);
-      window.open(`https://wa.me/919920976669?text=${whatsappMsg}`, '_blank');
-      
-      setForm({ name: '', phone: '', message: '' });
-    } catch (err) {
-      toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
+    toast({ title: 'Redirecting to WhatsApp!', description: 'Complete your message on WhatsApp.' });
+    
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    setForm({ name: '', phone: '', message: '' });
+    setLoading(false);
   };
 
   return (

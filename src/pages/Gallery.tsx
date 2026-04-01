@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,8 @@ import EmberParticles from '@/components/EmberParticles';
 import SparkCursor from '@/components/SparkCursor';
 import Footer from '@/components/Footer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { fetchMedia, fetchEvents } from '@/api/admin';
+
 
 interface GalleryItem {
   id: string;
@@ -269,13 +271,59 @@ export default function Gallery() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [items, setItems] = useState<GalleryItem[]>(GALLERY_ITEMS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [mediaData, eventData] = await Promise.all([
+          fetchMedia(),
+          fetchEvents()
+        ]);
+        
+        const apiItems: GalleryItem[] = [
+          ...mediaData.map((m: any) => ({
+            id: m.id.toString(),
+            type: m.type as 'image' | 'video',
+            title: m.caption || m.category || 'Celebration',
+            category: (m.category?.toLowerCase().replace(' ', '-') || 'event') as any,
+            src: m.url,
+            thumbnail: (m.type === 'video' && m.url.includes('instagram')) ? `https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800` : m.url,
+            videoId: m.type === 'video' ? m.url.split('/').pop() : undefined,
+            videoPlatform: m.type === 'video' ? (m.url.includes('instagram') ? 'instagram' as const : 'youtube' as const) : undefined,
+            description: m.caption
+          })),
+          ...eventData.map((e: any) => ({
+            id: 'e' + e.id,
+            type: 'image' as const,
+            title: e.name,
+            category: 'event' as const,
+            src: e.image,
+            description: e.description || `${e.location} - ${new Date(e.date).toLocaleDateString()}`
+          }))
+
+        ];
+        
+        if (apiItems.length > 0) {
+          setItems(apiItems);
+        }
+      } catch (err) {
+        console.error('Failed to load gallery', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const filtered =
     selectedCategory === 'all'
-      ? GALLERY_ITEMS
+      ? items
       : selectedCategory === 'video' || selectedCategory === 'image'
-      ? GALLERY_ITEMS.filter((item) => item.type === selectedCategory)
-      : GALLERY_ITEMS.filter((item) => item.category === selectedCategory);
+      ? items.filter((item) => item.type === selectedCategory)
+      : items.filter((item) => item.category === selectedCategory);
+
 
   const handleNext = () => {
     if (!selectedItem) return;
@@ -356,8 +404,9 @@ export default function Gallery() {
             whileInView={{ opacity: 1 }}
             className="text-sm text-muted-foreground/60 mt-6 text-center reveal"
           >
-            Showing {filtered.length} of {GALLERY_ITEMS.length} items
+            Showing {filtered.length} of {items.length} items
           </motion.p>
+
         </div>
       </section>
 

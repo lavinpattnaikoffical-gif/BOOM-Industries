@@ -13,9 +13,9 @@ import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton.tsx";
 // Lazy load pages for better performance
 const Products = lazy(() => import("./pages/Products.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
-const Admin = lazy(() => import("./pages/Admin.tsx"));
 const WhatWeOffer = lazy(() => import("./pages/WhatWeOffer.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
+const Admin = lazy(() => import("./pages/Admin.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -45,15 +45,6 @@ const App = () => (
               }
             />
             <Route
-              path="/admin"
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <Admin />
-                </Suspense>
-              }
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route
               path="/what-we-offer"
               element={
                 <Suspense fallback={<PageLoader />}>
@@ -66,6 +57,14 @@ const App = () => (
               element={
                 <Suspense fallback={<PageLoader />}>
                   <Contact />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <Admin />
                 </Suspense>
               }
             />

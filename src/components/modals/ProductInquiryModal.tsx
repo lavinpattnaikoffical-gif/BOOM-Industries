@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { X, Phone, User, Package, Loader2, CheckCircle, MessageSquare, ShoppingBag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { submitInquiry } from '@/api/inquiries';
+import { submitInquiry } from '@/api/admin';
+
+
+// WhatsApp business number (update with your number)
+const WHATSAPP_NUMBER = '919876543210';
 
 interface ProductInquiryModalProps {
   isOpen: boolean;
@@ -12,7 +16,6 @@ export default function ProductInquiryModal({ isOpen, onClose }: ProductInquiryM
   const [form, setForm] = useState({ name: '', phone: '', email: '', requirements: '', quantity: '', notes: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,42 +50,44 @@ export default function ProductInquiryModal({ isOpen, onClose }: ProductInquiryM
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setSubmitting(true);
-    try {
-      // Store in admin panel
-      await submitInquiry({
-        ...form,
-        requirement: 'Product Custom Quote',
-        city: 'N/A' 
-      } as any);
-      
-      setSubmitted(true);
-      toast({
-        title: '🎆 Inquiry Received!',
-        description: `Thank you ${form.name}! Click below to get price details on WhatsApp.`,
-      });
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to submit inquiry. Please try again.',
-        variant: 'destructive'
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleWhatsAppRedirect = () => {
-    const message = `Hello, I'm ${form.name}. I'm interested in: ${form.requirements}. Quantity: ${form.quantity || 'N/A'}. Contact: ${form.phone}.`;
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/919920976669?text=${encodedMessage}`, '_blank');
     
-    // Close modal after redirection
-    setTimeout(() => {
-      setSubmitted(false);
-      setForm({ name: '', phone: '', email: '', requirements: '', quantity: '', notes: '' });
-      onClose();
-    }, 1000);
+    // Build WhatsApp message
+    let message = `*Custom Product Inquiry*\n\n`;
+    message += `*Name:* ${form.name}\n`;
+    message += `*Phone:* ${form.phone}\n`;
+    if (form.email) message += `*Email:* ${form.email}\n`;
+    message += `*Requirements:* ${form.requirements}\n`;
+    if (form.quantity) message += `*Quantity:* ${form.quantity}\n`;
+    if (form.notes) message += `*Notes:* ${form.notes}`;
+
+    // Save to database
+    try {
+      await (submitInquiry as any)({
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        type: 'Bulk',
+        requirement: 'Product Custom Quote',
+        message: `Requirements: ${form.requirements}. Quantity: ${form.quantity}. Notes: ${form.notes}`
+      });
+    } catch (err) {
+
+      console.error('Failed to save inquiry to DB', err);
+    }
+
+    // Open WhatsApp
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+
+
+    toast({
+      title: '🎆 Redirecting to WhatsApp!',
+      description: 'Complete your inquiry on WhatsApp for instant response.',
+    });
+
+    setForm({ name: '', phone: '', email: '', requirements: '', quantity: '', notes: '' });
+    setSubmitting(false);
+    onClose();
   };
 
   return (
@@ -102,65 +107,52 @@ export default function ProductInquiryModal({ isOpen, onClose }: ProductInquiryM
         </div>
 
         <div className="p-6">
-          {submitted ? (
-            <div className="text-center py-8">
-              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
-              <h3 className="font-display font-bold text-xl mb-4 text-foreground">Inquiry Sent! 🎉</h3>
-              <button
-                onClick={handleWhatsAppRedirect}
-                className="btn-boom-green w-full py-4 text-base flex items-center justify-center gap-2"
-              >
-                <MessageSquare className="w-5 h-5" /> Get Price Details (WhatsApp)
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1.5 text-foreground">
-                    <User className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Name *
-                  </label>
-                  <input name="name" value={form.name} onChange={handleChange} placeholder="Your Name" className="boom-input" />
-                  {errors.name && <p className="text-xs mt-1 text-red-500">{errors.name}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1.5 text-foreground">
-                    <Phone className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Phone *
-                  </label>
-                  <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" className="boom-input" />
-                  {errors.phone && <p className="text-xs mt-1 text-red-500">{errors.phone}</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-1.5 text-foreground">Email (optional)</label>
-                <input name="email" value={form.email} onChange={handleChange} placeholder="Email Address" className="boom-input" />
-              </div>
-
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold mb-1.5 text-foreground">
-                  <Package className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Product Requirements *
+                  <User className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Name *
                 </label>
-                <textarea name="requirements" value={form.requirements} onChange={handleChange} placeholder="Describe your requirement..." className="boom-input min-h-[80px]" />
-                {errors.requirements && <p className="text-xs mt-1 text-red-500">{errors.requirements}</p>}
+                <input name="name" value={form.name} onChange={handleChange} placeholder="Your Name" className="boom-input" />
+                {errors.name && <p className="text-xs mt-1 text-red-500">{errors.name}</p>}
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1.5 text-muted-foreground">Quantity (optional)</label>
-                  <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="e.g. 50 boxes" className="boom-input" />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1.5 text-muted-foreground">Additional Notes</label>
-                  <input name="notes" value={form.notes} onChange={handleChange} placeholder="Any other info?" className="boom-input" />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1.5 text-foreground">
+                  <Phone className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Phone *
+                </label>
+                <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone Number" className="boom-input" />
+                {errors.phone && <p className="text-xs mt-1 text-red-500">{errors.phone}</p>}
               </div>
+            </div>
 
-              <button type="submit" disabled={submitting} className="w-full btn-boom-primary py-3.5 mt-2 flex items-center justify-center gap-2">
-                {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : 'Send Inquiry'}
-              </button>
-            </form>
-          )}
+            <div>
+              <label className="block text-sm font-semibold mb-1.5 text-foreground">Email (optional)</label>
+              <input name="email" value={form.email} onChange={handleChange} placeholder="Email Address" className="boom-input" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1.5 text-foreground">
+                <Package className="w-3.5 h-3.5 inline mr-1.5 mb-0.5 text-primary" /> Product Requirements *
+              </label>
+              <textarea name="requirements" value={form.requirements} onChange={handleChange} placeholder="Describe your requirement..." className="boom-input min-h-[80px]" />
+              {errors.requirements && <p className="text-xs mt-1 text-red-500">{errors.requirements}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold mb-1.5 text-muted-foreground">Quantity (optional)</label>
+                <input name="quantity" value={form.quantity} onChange={handleChange} placeholder="e.g. 50 boxes" className="boom-input" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1.5 text-muted-foreground">Additional Notes</label>
+                <input name="notes" value={form.notes} onChange={handleChange} placeholder="Any other info?" className="boom-input" />
+              </div>
+            </div>
+
+            <button type="submit" disabled={submitting} className="w-full btn-boom-primary py-3.5 mt-2 flex items-center justify-center gap-2">
+              {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : <><MessageSquare className="w-5 h-5" /> Send via WhatsApp</>}
+            </button>
+          </form>
         </div>
       </div>
     </div>

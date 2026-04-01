@@ -14,101 +14,20 @@ import productRockets from '@/assets/product-rockets.jpg';
 import productFountains from '@/assets/product-fountains.jpg';
 import productCrackers from '@/assets/product-crackers.jpg';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  image: string;
-  price: string;
-  rating: string;
-  description: string;
-}
+import { fetchProducts } from '@/api/admin';
+import { Product } from '@/types';
 
-const ALL_PRODUCTS: Product[] = [
-  {
-    id: '1',
-    name: 'Golden Blaze Rockets',
-    category: 'Rockets',
-    image: productRockets,
-    price: '₹450',
-    rating: '4.8',
-    description: 'Premium rockets with golden sparks and loud sound effect',
-  },
-  {
-    id: '2',
-    name: 'Royal Fountain Cone',
-    category: 'Fountains',
-    image: productFountains,
-    price: '₹320',
-    rating: '4.9',
-    description: 'Elegant fountain with cascading sparks',
-  },
-  {
-    id: '3',
-    name: 'Premium Sparkler Box',
-    category: 'Sparklers',
-    image: productSparklers,
-    price: '₹180',
-    rating: '4.7',
-    description: 'Safe and bright sparklers for all ages',
-  },
-  {
-    id: '4',
-    name: 'Festival Cracker Pack',
-    category: 'Crackers',
-    image: productCrackers,
-    price: '₹550',
-    rating: '4.6',
-    description: 'Loud crackers perfect for celebrations',
-  },
-  {
-    id: '5',
-    name: 'Sky Commander Multi-Shot',
-    category: 'Rockets',
-    image: productRockets,
-    price: '₹1,200',
-    rating: '4.9',
-    description: 'Premium multi-shot rocket with visual effects',
-  },
-  {
-    id: '6',
-    name: 'Diamond Rain Fountain',
-    category: 'Fountains',
-    image: productFountains,
-    price: '₹480',
-    rating: '4.8',
-    description: 'High-quality fountain with bright white sparks',
-  },
-  {
-    id: '7',
-    name: 'Silver Star Sparklers',
-    category: 'Sparklers',
-    image: productSparklers,
-    price: '₹220',
-    rating: '4.7',
-    description: 'Long-lasting sparklers with silver glitter',
-  },
-  {
-    id: '8',
-    name: 'Thunder Strike Crackers',
-    category: 'Crackers',
-    image: productCrackers,
-    price: '₹650',
-    rating: '4.8',
-    description: 'Super loud crackers with extended boom',
-  },
-  {
-    id: '9',
-    name: 'Red Comet Rocket',
-    category: 'Rockets',
-    image: productRockets,
-    price: '₹380',
-    rating: '4.7',
-    description: 'Fast-flying rocket with red trail',
-  },
-];
+// NOTE: Products are now loaded from the backend API.
+// Static placeholder array and fixed categories have been removed.
 
-const CATEGORIES = ['All', 'Factory', 'Bomb', 'Flower Pot', 'Chakkar', '9 cm'];
+
+
+// Helper function to get unique categories
+const getCategoriesFromProducts = (products: Product[]) => {
+  const cats = ['All', ...new Set(products.map((p) => p.category))];
+  return cats;
+};
+
 const PRICE_RANGES = [
   { label: 'All Prices', min: 0, max: Infinity },
   { label: '₹0 - ₹500', min: 0, max: 500 },
@@ -185,7 +104,7 @@ const ProductCard = ({ product, onAddToInquiry, isHovered, setIsHovered }: Produ
 
           {/* Rating Badge */}
           <div className="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-night-deep/70 border border-primary/20 text-xs font-body text-primary">
-            ★ {product.rating}
+            ★ {product.rating || '4.5'}
           </div>
 
           {/* Hover Overlay */}
@@ -242,13 +161,31 @@ export default function Products() {
   const [selectedPriceRange, setSelectedPriceRange] = useState('All Prices');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('featured');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load products from backend
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await fetchProducts();
+        setProducts(data);
+      } catch (e) {
+        console.error('Failed to fetch products', e);
+        toast({ title: 'Error', description: 'Could not load products', variant: 'destructive' });
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   // Filter products
-  const filtered = ALL_PRODUCTS.filter((p) => {
+  const filtered = products.filter((p) => {
     const categoryMatch = selectedCategory === 'All' || p.category === selectedCategory;
     const priceRange = PRICE_RANGES.find((r) => r.label === selectedPriceRange);
     const price = parseFloat(p.price.replace(/[^0-9.-]+/g, ''));
-    const priceMatch = price >= priceRange!.min && price <= priceRange!.max;
+    const priceMatch = price >= (priceRange?.min ?? 0) && price <= (priceRange?.max ?? Infinity);
     const searchMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
     return categoryMatch && priceMatch && searchMatch;
   });
@@ -335,7 +272,7 @@ export default function Products() {
                 Category
               </label>
               <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((cat) => (
+                {getCategoriesFromProducts(products).map((cat) => (
                   <motion.button
                     key={cat}
                     whileHover={{ scale: 1.05 }}
@@ -352,6 +289,7 @@ export default function Products() {
                 ))}
               </div>
             </div>
+
 
             {/* Price Filter */}
             <div>
@@ -398,7 +336,7 @@ export default function Products() {
             whileInView={{ opacity: 1 }}
             className="text-sm text-muted-foreground/60 mt-6 reveal"
           >
-            Showing {filtered.length} of {ALL_PRODUCTS.length} products
+            Showing {filtered.length} of {products.length} products
           </motion.p>
         </div>
       </section>

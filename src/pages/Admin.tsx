@@ -44,7 +44,10 @@ import {
   deleteInquiry,
   fetchAdmins,
   addAdmin,
-  deleteAdmin
+  deleteAdmin,
+  updateAdmin,
+  updateAdminProfile,
+  updateAdminPassword, fetchMedia, addMedia, updateMedia, deleteMedia
 } from '@/api/admin';
 import { AdminUser, Product, EventItem, Lead, InquiryStatus } from '@/types';
 
@@ -91,7 +94,8 @@ export default function Admin() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'events' | 'inquiries' | 'admins'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'events' | 'inquiries' | 'admins' | 'profile' | 'media'>('dashboard');
+
   const [user, setUser] = useState<AdminUser | null>(getCurrentUser());
   const [isAuth, setIsAuth] = useState(!!user);
   
@@ -104,6 +108,8 @@ export default function Admin() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [inquiries, setInquiries] = useState<Lead[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [media, setMedia] = useState<any[]>([]);
+
 
   // UI States
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -248,9 +254,12 @@ export default function Admin() {
           <SidebarItem icon={Package} label="Products" active={activeTab === 'products'} onClick={() => { setActiveTab('products'); setMobileSidebarOpen(false); }} />
           <SidebarItem icon={Calendar} label="Events" active={activeTab === 'events'} onClick={() => { setActiveTab('events'); setMobileSidebarOpen(false); }} />
           <SidebarItem icon={MessageSquare} label="Inquiries" active={activeTab === 'inquiries'} onClick={() => { setActiveTab('inquiries'); setMobileSidebarOpen(false); }} />
-          {user?.role === 'superadmin' && (
+          {user?.role === 'super' && (
             <SidebarItem icon={Users} label="Admins" active={activeTab === 'admins'} onClick={() => { setActiveTab('admins'); setMobileSidebarOpen(false); }} />
           )}
+          <SidebarItem icon={ImageIcon} label="Gallery" active={activeTab === 'media'} onClick={() => { setActiveTab('media'); setMobileSidebarOpen(false); }} />
+          <SidebarItem icon={ShieldCheck} label="Profile" active={activeTab === 'profile'} onClick={() => { setActiveTab('profile'); setMobileSidebarOpen(false); }} />
+
         </nav>
 
         <div className="pt-6 border-t border-white/5">
@@ -320,7 +329,7 @@ export default function Admin() {
                 { name: 'name', label: 'Name', type: 'text' },
                 { name: 'category', label: 'Category', type: 'select', options: ['Factory', 'Bomb', 'Flower Pot', 'Chakkar', '9 cm'] },
                 { name: 'price', label: 'Price', type: 'text' },
-                { name: 'image', label: 'Image URL', type: 'text' },
+                { name: 'image', label: 'Image Upload', type: 'file' },
                 { name: 'description', label: 'Description', type: 'textarea' }
               ]}
             />
@@ -337,6 +346,7 @@ export default function Admin() {
                 { name: 'name', label: 'Event Name', type: 'text' },
                 { name: 'date', label: 'Date', type: 'date' },
                 { name: 'location', label: 'Location', type: 'text' },
+                { name: 'image', label: 'Image Upload', type: 'file' },
                 { name: 'status', label: 'Status', type: 'select', options: ['upcoming', 'completed', 'cancelled'] },
                 { name: 'description', label: 'Description', type: 'textarea' }
               ]}
@@ -348,15 +358,34 @@ export default function Admin() {
               title="Admin" 
               items={admins} 
               onAdd={addAdmin} 
+              onUpdate={updateAdmin}
               onDelete={deleteAdmin} 
               refresh={loadData}
               fields={[
-                { name: 'name', label: 'Full Name', type: 'text' },
                 { name: 'username', label: 'Username', type: 'text' },
-                { name: 'role', label: 'Role', type: 'select', options: ['admin', 'superadmin'] }
+                { name: 'password', label: 'Password (leave blank if unchanged)', type: 'password', optional: true },
+                { name: 'role', label: 'Role', type: 'select', options: ['regular', 'super'] }
               ]}
             />
           )}
+          {activeTab === 'profile' && <ProfileManager user={user} setUser={setUser} />}
+          {activeTab === 'media' && (
+            <GenericManager 
+              title="Media" 
+              items={media} 
+              onAdd={addMedia} 
+              onUpdate={updateMedia} 
+              onDelete={deleteMedia} 
+              refresh={loadData}
+              fields={[
+                { name: 'url', label: 'URL (Image/Video URL)', type: 'text' },
+                { name: 'type', label: 'Type', type: 'select', options: ['photo', 'video'] },
+                { name: 'category', label: 'Category', type: 'select', options: ['Photos', 'Videos', 'Events'] },
+                { name: 'caption', label: 'Caption', type: 'textarea' }
+              ]}
+            />
+          )}
+
         </div>
       </main>
     </div>
@@ -572,13 +601,19 @@ function GenericManager({ title, items, onAdd, onUpdate, onDelete, refresh, fiel
                         <input 
                           type={f.type} 
                           className="boom-input w-full" 
-                          value={formData[f.name] || ''}
-                          onChange={e => setFormData({...formData, [f.name]: e.target.value})}
-                          required={f.name !== 'image' && f.name !== 'price'}
+                          value={f.type === 'file' ? undefined : (formData[f.name] || '')}
+                          onChange={e => {
+                            if (f.type === 'file') {
+                              setFormData({...formData, [f.name]: e.target.files?.[0]});
+                            } else {
+                              setFormData({...formData, [f.name]: e.target.value});
+                            }
+                          }}
+                          required={f.name !== 'image' && f.name !== 'price' && !f.optional && !editingItem}
                         />
                         {f.name === 'image' && formData.image && (
                           <div className="mt-2 rounded-xl overflow-hidden border border-white/10 h-32 relative group">
-                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                            <img src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image} alt="Preview" className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                               <span className="text-xs font-semibold uppercase tracking-widest">Preview</span>
                             </div>
@@ -750,6 +785,77 @@ function InquiryManager({ inquiries, refresh }: any) {
           </div>
         ))}
         {filtered.length === 0 && <p className="text-center text-muted-foreground py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">No inquiries found for this filter</p>}
+      </div>
+    </div>
+  );
+}
+
+// ── Profile Manager ──
+function ProfileManager({ user, setUser }: { user: AdminUser | null, setUser: (user: AdminUser) => void }) {
+  const { toast } = useToast();
+  const [username, setUsername] = useState(user?.username || '');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { updateAdminProfile } = await import('@/api/admin');
+      const res = await updateAdminProfile(user.id, { username });
+      setUser(res.user);
+      toast({ title: 'Success', description: 'Profile updated' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.response?.data?.error || 'Update failed', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password || !user) return;
+    setLoading(true);
+    try {
+      const { updateAdminPassword } = await import('@/api/admin');
+      await updateAdminPassword(user.id, password);
+      setPassword('');
+      toast({ title: 'Success', description: 'Password updated' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Update failed', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="glass-card p-8 rounded-2xl border border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full pointer-events-none" />
+        <h3 className="text-xl font-display font-bold mb-6">Profile Settings</h3>
+        <form onSubmit={handleProfileUpdate} className="space-y-4 relative z-10">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Username</label>
+            <input type="text" className="boom-input w-full" value={username} onChange={e => setUsername(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Role</label>
+            <input type="text" className="boom-input w-full opacity-50 cursor-not-allowed uppercase text-xs font-bold tracking-widest" value={user?.role} disabled />
+          </div>
+          <button type="submit" disabled={loading || username === user?.username} className="btn-boom-primary py-3 px-6 mt-4">Update Profile</button>
+        </form>
+      </div>
+
+      <div className="glass-card p-8 rounded-2xl border border-white/5 relative overflow-hidden">
+        <h3 className="text-xl font-display font-bold mb-6 text-red-100">Change Password</h3>
+        <form onSubmit={handlePasswordUpdate} className="space-y-4 relative z-10">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">New Password</label>
+            <input type="password" className="boom-input w-full" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} placeholder="Enter new password" />
+          </div>
+          <button type="submit" disabled={loading || !password} className="py-3 px-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold transition-all">Update Password</button>
+        </form>
       </div>
     </div>
   );

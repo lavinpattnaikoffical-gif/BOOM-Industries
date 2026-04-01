@@ -28,8 +28,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { inquiryFormSchema } from '@/utils/validators';
-import { submitInquiry } from '@/api/inquiries';
 import { useInquiryCart } from '@/contexts/InquiryContext';
+
+// WhatsApp business number (update with your number)
+const WHATSAPP_NUMBER = '919876543210';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -55,31 +57,42 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
-    try {
-      const result = await submitInquiry({
-        ...data,
-        items: items.length > 0 ? items : [],
+    
+    // Build WhatsApp message
+    let message = `*New Inquiry from Website*\n\n`;
+    message += `*Name:* ${data.name}\n`;
+    message += `*Phone:* ${data.phone}\n`;
+    if (data.city) message += `*City:* ${data.city}\n`;
+    message += `*Requirement:* ${data.requirement}\n`;
+    
+    if (items.length > 0) {
+      message += `\n*Selected Products:*\n`;
+      items.forEach(item => {
+        message += `- ${item.productName} x${item.quantity}\n`;
       });
-
-      toast({
-        title: 'Success!',
-        description: 'Your inquiry has been submitted. We\'ll contact you soon!',
-        duration: 5000,
-      });
-
-      clearCart();
-      form.reset();
-      onClose();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to submit inquiry. Please try again.',
-        variant: 'destructive',
-        duration: 5000,
-      });
-    } finally {
-      setIsSubmitting(false);
+      if (total > 0) {
+        message += `\n*Estimated Value:* ₹${total.toFixed(2)}\n`;
+      }
     }
+    
+    if (data.message) {
+      message += `\n*Message:* ${data.message}`;
+    }
+
+    // Open WhatsApp with the message
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+
+    toast({
+      title: 'Redirecting to WhatsApp!',
+      description: 'Complete your inquiry on WhatsApp for faster response.',
+      duration: 5000,
+    });
+
+    clearCart();
+    form.reset();
+    setIsSubmitting(false);
+    onClose();
   };
 
   return (

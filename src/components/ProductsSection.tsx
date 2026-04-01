@@ -1,26 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { fetchProducts } from '@/api/admin';
+import { Product } from '@/types';
+
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import productSparklers from '@/assets/product-sparklers.jpg';
 import productRockets from '@/assets/product-rockets.jpg';
 import productFountains from '@/assets/product-fountains.jpg';
 import productCrackers from '@/assets/product-crackers.jpg';
 
-const categories = ['All', 'Rockets', 'Fountains', 'Sparklers', 'Crackers'];
+// Categories will be derived from products
 
-const products = [
-  { name: 'Sky Commander Multi-Shot', category: 'Rockets',  image: productRockets,   price: '₹1,200', rating: '4.9', glow: '#ef4444', tag: 'Top Pick' },
-  { name: 'Golden Blaze Rockets',     category: 'Rockets',  image: productRockets,   price: '₹450',   rating: '4.8', glow: '#f5b800', tag: 'Best Seller' },
-  { name: 'Diamond Rain Fountain',    category: 'Fountains',image: productFountains, price: '₹480',   rating: '4.8', glow: '#16a34a', tag: 'New' },
-  { name: 'Royal Fountain Cone',      category: 'Fountains',image: productFountains, price: '₹320',   rating: '4.9', glow: '#7eafff', tag: 'Top Rated' },
-  { name: 'Premium Sparkler Box',     category: 'Sparklers',image: productSparklers, price: '₹180',   rating: '4.7', glow: '#f5b800', tag: 'Gift Ready' },
-  { name: 'Festival Cracker Pack',    category: 'Crackers', image: productCrackers,  price: '₹550',   rating: '4.6', glow: '#ef4444', tag: 'Popular' },
-];
+
+// Static fallback removed, now using API
+
 
 export default function ProductsSection() {
   const ref = useScrollReveal();
   const [active, setActive] = useState('All');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = active === 'All' ? products : products.filter(p => p.category === active);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await fetchProducts();
+        setProducts(data);
+      } catch (e) {
+        console.error('Failed to load products', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const getGlowColor = (category: string) => {
+    switch(category) {
+      case 'Rockets': return '#ef4444';
+      case 'Fountains': return '#16a34a';
+      case 'Sparklers': return '#f5b800';
+      case 'Crackers': return '#ef4444';
+      default: return '#7eafff';
+    }
+  };
+
+  const filtered = (active === 'All' ? products : products.filter(p => p.category === active)).slice(0, 6);
+
 
   return (
     <section id="products" className="relative py-24" ref={ref}
@@ -44,7 +69,7 @@ export default function ProductsSection() {
 
         {/* Category Filter */}
         <div className="reveal flex flex-wrap justify-center gap-2.5 mb-10">
-          {categories.map(cat => (
+          {['All', ...new Set(products.map(p => p.category))].map(cat => (
             <button
               key={cat}
               onClick={() => setActive(cat)}
@@ -61,6 +86,7 @@ export default function ProductsSection() {
           ))}
         </div>
 
+
         {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
           {filtered.map((p, i) => (
@@ -68,21 +94,24 @@ export default function ProductsSection() {
               key={p.name + i}
               className="reveal boom-card rounded-2xl overflow-hidden cursor-pointer"
               style={{
-                border: `1px solid ${p.glow}18`,
+                border: `1px solid ${getGlowColor(p.category)}18`,
                 transition: 'border-color 0.35s, box-shadow 0.35s, transform 0.35s',
               }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = `${p.glow}50`;
-                el.style.boxShadow = `0 0 32px ${p.glow}22, 0 12px 40px rgba(0,0,0,0.4)`;
+                const color = getGlowColor(p.category);
+                el.style.borderColor = `${color}50`;
+                el.style.boxShadow = `0 0 32px ${color}22, 0 12px 40px rgba(0,0,0,0.4)`;
                 el.style.transform = 'translateY(-6px)';
               }}
               onMouseLeave={e => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = `${p.glow}18`;
+                const color = getGlowColor(p.category);
+                el.style.borderColor = `${color}18`;
                 el.style.boxShadow = '';
                 el.style.transform = 'translateY(0)';
               }}
+
             >
               {/* Image */}
               <div className="relative overflow-hidden">
@@ -95,14 +124,15 @@ export default function ProductsSection() {
                      style={{ background: 'linear-gradient(to top, rgba(14,14,19,0.9) 0%, transparent 55%)' }} />
                 {/* Rating */}
                 <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-display font-bold"
-                     style={{ background: 'rgba(14,14,19,0.8)', backdropFilter: 'blur(8px)', border: `1px solid ${p.glow}40`, color: p.glow }}>
-                  ★ {p.rating}
+                     style={{ background: 'rgba(14,14,19,0.8)', backdropFilter: 'blur(8px)', border: `1px solid ${getGlowColor(p.category)}40`, color: getGlowColor(p.category) }}>
+                  ★ {p.rating || '4.5'}
                 </div>
                 {/* Tag */}
                 <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-display font-bold tracking-wider uppercase"
-                     style={{ background: `${p.glow}20`, border: `1px solid ${p.glow}40`, color: p.glow }}>
-                  {p.tag}
+                     style={{ background: `${getGlowColor(p.category)}20`, border: `1px solid ${getGlowColor(p.category)}40`, color: getGlowColor(p.category) }}>
+                  {p.category === 'Rockets' ? 'Top Pick' : 'Popular'}
                 </div>
+
               </div>
 
               {/* Info */}
@@ -113,12 +143,13 @@ export default function ProductsSection() {
                   {p.name}
                 </h3>
                 <div className="flex items-center justify-between">
-                  <span className="font-display font-bold text-xl" style={{ color: p.glow }}>{p.price}</span>
+                  <span className="font-display font-bold text-xl" style={{ color: getGlowColor(p.category) }}>{p.price}</span>
                   <button className="px-3.5 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-300"
-                          style={{ background: `${p.glow}15`, border: `1px solid ${p.glow}35`, color: p.glow }}>
+                           style={{ background: `${getGlowColor(p.category)}15`, border: `1px solid ${getGlowColor(p.category)}35`, color: getGlowColor(p.category) }}>
                     Add to Inquiry
                   </button>
                 </div>
+
               </div>
             </div>
           ))}
