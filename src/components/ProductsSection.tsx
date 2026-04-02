@@ -52,7 +52,7 @@ export default function ProductsSection() {
     });
   };
 
-  const filtered = (active === 'All' ? products : products.filter(p => p.category === active)).slice(0, 6);
+  const filtered = active === 'All' ? products : products.filter(p => p.category === active);
 
   // Fallback products if DB is empty
   const displayProducts = filtered.length > 0 ? filtered : [
