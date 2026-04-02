@@ -78,14 +78,14 @@ export default function EventInquiryModal({ isOpen, onClose }: EventInquiryModal
       console.error('Failed to save event inquiry to DB', err);
     }
 
-    // Open WhatsApp
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    // Open WhatsApp (Removed redirect logic)
+    // const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, '_blank');
 
 
     toast({
-      title: '🎉 Redirecting to WhatsApp!',
-      description: 'Complete your event inquiry on WhatsApp for instant response.',
+      title: '🎉 Inquiry Received!',
+      description: 'Your event inquiry has been logged. We will contact you soon.',
     });
 
     setForm({ name: '', phone: '', email: '', eventType: '', eventDate: '', location: '', budget: '', requirements: '' });
@@ -174,7 +174,7 @@ export default function EventInquiryModal({ isOpen, onClose }: EventInquiryModal
             </div>
 
             <button type="submit" disabled={submitting} className="w-full btn-boom-primary py-3.5 mt-2 flex items-center justify-center gap-2">
-              {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : <><MessageSquare className="w-5 h-5" /> Send via WhatsApp</>}
+              {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : <><MessageSquare className="w-5 h-5" /> Submit Event Inquiry</>}
             </button>
           </form>
         </div>

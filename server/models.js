@@ -67,7 +67,7 @@ async function initDatabase() {
         location VARCHAR(255),
         budget VARCHAR(100),
         requirements TEXT,
-        status VARCHAR(50) DEFAULT 'New' CHECK (status IN ('New', 'In Progress', 'Resolved')),
+        status VARCHAR(50) DEFAULT 'new' CHECK (status IN ('new', 'in-progress', 'resolved')),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -83,6 +83,8 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+
+      ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS product_name VARCHAR(255);
     `);
     console.log('Database tables initialized');
   } finally {

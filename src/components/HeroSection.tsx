@@ -79,7 +79,7 @@ export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
         >
           Lighting up your celebrations since decades.
           <br className="hidden sm:block" />
-          Latur's premier fireworks manufacturers, wholesalers & retailers.
+          India's premier fireworks manufacturers, wholesalers & retailers.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 w-full sm:w-auto px-4 sm:px-0">

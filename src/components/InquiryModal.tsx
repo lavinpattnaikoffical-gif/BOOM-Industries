@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Phone, User, MapPin, Package, Loader2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { submitInquiry } from '@/api/admin';
 
 // WhatsApp business number (update with your number)
 const WHATSAPP_NUMBER = '919876543210';
@@ -68,13 +69,34 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       message += `*Requirement:* ${reqLabel}`;
     }
 
-    // Open WhatsApp
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    // Open WhatsApp (Removed redirect logic)
+    // const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, '_blank');
+
+    // Save to database
+    try {
+      await submitInquiry({
+        name: form.name,
+        phone: form.phone,
+        city: form.city,
+        requirement: form.requirement || 'Retail',
+        items: [],
+        message: `Requirement Type: ${form.requirement}`
+      } as any);
+    } catch (err) {
+      console.error('Failed to submit inquiry to db', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to save your inquiry. Please call us directly.',
+        variant: 'destructive'
+      });
+      setSubmitting(false);
+      return;
+    }
 
     toast({
-      title: '🎆 Redirecting to WhatsApp!',
-      description: 'Complete your inquiry on WhatsApp for instant response.',
+      title: '🎆 Quote Request Received!',
+      description: 'We will get back to you with the best prices shortly.',
     });
 
     setForm({ name: '', phone: '', city: '', requirement: '' });
@@ -205,7 +227,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
                 {submitting ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Sending...</>
                 ) : (
-                  <><MessageSquare className="w-5 h-5" /> Send via WhatsApp</>
+                   <><MessageSquare className="w-5 h-5" /> Submit Request</>
                 )}
               </button>
             </div>

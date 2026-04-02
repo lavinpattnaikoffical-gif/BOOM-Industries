@@ -62,7 +62,7 @@ export default function AboutSection() {
             </h2>
             <div className="space-y-4 font-body leading-relaxed mb-8" style={{ color: 'rgba(172,170,177,0.95)', fontSize: '1rem' }}>
               <p>
-                Welcome to <strong style={{ color: '#f9f5fd' }}>BOOM Industries (BFW)</strong>, Latur's most trusted name in the world of pyrotechnics. For decades, we have been at the forefront of manufacturing and supplying high-quality fireworks that make every occasion unforgettable.
+                Welcome to <strong style={{ color: '#f9f5fd' }}>BOOM Industries (BFW)</strong>, India's most trusted name in the world of pyrotechnics. For decades, we have been at the forefront of manufacturing and supplying high-quality fireworks that make every occasion unforgettable.
               </p>
               <p>
                 Our commitment to safety, innovation, and "The Big Boom" has made us the preferred choice for thousands of families and event organizers across the region.

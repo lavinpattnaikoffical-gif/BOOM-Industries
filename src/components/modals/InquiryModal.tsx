@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { inquiryFormSchema } from '@/utils/validators';
 import { useInquiryCart } from '@/contexts/InquiryContext';
+import { submitInquiry } from '@/api/admin';
 
 // WhatsApp business number (update with your number)
 const WHATSAPP_NUMBER = '919876543210';
@@ -79,13 +80,34 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       message += `\n*Message:* ${data.message}`;
     }
 
-    // Open WhatsApp with the message
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    // Open WhatsApp with the message (Removed as per request to stop redirection)
+    // const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    // window.open(whatsappUrl, '_blank');
+
+    // Save to database
+    try {
+      await submitInquiry({
+        name: data.name,
+        phone: data.phone,
+        city: data.city,
+        requirement: data.requirement,
+        items: items,
+        message: data.message
+      });
+    } catch (err) {
+      console.error('Failed to save inquiry to DB', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to submit inquiry to our database. Please try again or contact us via phone.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     toast({
-      title: 'Redirecting to WhatsApp!',
-      description: 'Complete your inquiry on WhatsApp for faster response.',
+      title: 'Inquiry Submitted!',
+      description: 'Your inquiry has been received. We will get back to you soon!',
       duration: 5000,
     });
 

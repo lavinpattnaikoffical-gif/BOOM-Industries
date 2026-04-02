@@ -40,14 +40,21 @@ import {
   updateEvent,
   deleteEvent,
   fetchInquiries,
+  fetchEventInquiries,
   updateInquiryStatus,
+  updateEventInquiryStatus,
   deleteInquiry,
+  deleteEventInquiry,
   fetchAdmins,
   addAdmin,
   deleteAdmin,
   updateAdmin,
   updateAdminProfile,
-  updateAdminPassword, fetchMedia, addMedia, updateMedia, deleteMedia
+  updateAdminPassword, 
+  fetchMedia, 
+  addMedia, 
+  updateMedia, 
+  deleteMedia
 } from '@/api/admin';
 import { AdminUser, Product, EventItem, Lead, InquiryStatus } from '@/types';
 
@@ -109,8 +116,7 @@ export default function Admin() {
   const [inquiries, setInquiries] = useState<Lead[]>([]);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [media, setMedia] = useState<any[]>([]);
-
-
+  
   // UI States
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -141,16 +147,33 @@ export default function Admin() {
   const loadData = async () => {
     if (!isAuth) return;
     try {
-      const [p, e, i, a] = await Promise.all([
+      const [p, e, inquiriesResult, eventInquiriesResult, a, m] = await Promise.all([
         fetchProducts(),
         fetchEvents(),
         fetchInquiries(),
-        fetchAdmins()
+        fetchEventInquiries(),
+        fetchAdmins(),
+        fetchMedia()
       ]);
       setProducts(p);
       setEvents(e);
-      setInquiries(i);
       setAdmins(a);
+      setMedia(m);
+      
+      // Clean up event inquiries to match Inquiry type for display
+      const normalizedEventInquiries = eventInquiriesResult.map((ei: any) => ({
+        ...ei,
+        id: ei.id || ei._id,
+        requirement: `Event: ${ei.eventType || 'Planning'}`,
+        message: ei.requirements || ei.message
+      }));
+
+      // Filter out empty inquiries if any
+      const allInquiries = [...inquiriesResult, ...normalizedEventInquiries].filter(i => i.name);
+
+      setInquiries(allInquiries.sort((a,b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ));
     } catch (err) {
       console.error('Failed to load data', err);
     }
@@ -158,6 +181,8 @@ export default function Admin() {
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(loadData, 30000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
   }, [isAuth]);
 
   // ── Render Helpers ──
@@ -307,7 +332,11 @@ export default function Admin() {
                   className="boom-input pl-10 py-2 w-64 text-sm"
                 />
               </div>
-              <button className="p-2 hidden md:block rounded-xl bg-white/5 text-muted-foreground hover:text-foreground transition-colors">
+              <button 
+                onClick={loadData}
+                className="p-2 rounded-xl bg-white/5 text-muted-foreground hover:text-foreground transition-all duration-500 hover:rotate-180"
+                title="Refresh Data"
+              >
                 <Clock className="w-5 h-5" />
               </button>
             </div>
@@ -645,15 +674,19 @@ function InquiryManager({ inquiries, refresh }: any) {
 
   const filtered = inquiries.filter((i: Lead) => {
     const statusMatch = filter === 'all' || i.status === filter;
+    const isProduct = ['retail', 'bulk', 'corporate', 'product'].some(term => i.requirement?.toLowerCase().includes(term));
+    const isEvent = i.requirement?.toLowerCase().includes('event');
+    
     const typeMatch = typeTab === 'all' || 
-                     (typeTab === 'product' && i.requirement.includes('Product')) || 
-                     (typeTab === 'event' && i.requirement.includes('Event'));
+                     (typeTab === 'product' && isProduct) || 
+                     (typeTab === 'event' && isEvent);
     return statusMatch && typeMatch;
   });
 
-  const handleStatus = async (id: string, status: InquiryStatus) => {
+  const handleStatus = async (id: string, status: InquiryStatus, requirement: string) => {
     try {
-      await updateInquiryStatus(id, status);
+      const action = requirement.toLowerCase().includes('event') ? updateEventInquiryStatus : updateInquiryStatus;
+      await action(id, status);
       toast({ title: 'Status Updated', description: `Inquiry is now ${status}` });
       refresh();
     } catch (err) {
@@ -730,7 +763,7 @@ function InquiryManager({ inquiries, refresh }: any) {
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center font-display font-bold text-primary text-xl">
-                  {i.name[0]}
+                  {i.name?.[0] || '?'}
                 </div>
                 <div>
                   <h4 className="font-display font-bold text-lg text-foreground">{i.name}</h4>
@@ -742,7 +775,7 @@ function InquiryManager({ inquiries, refresh }: any) {
               <div className="flex items-center gap-2">
                 <select 
                   value={i.status} 
-                  onChange={e => handleStatus(i.id, e.target.value as any)}
+                  onChange={e => handleStatus(i.id, e.target.value as any, i.requirement)}
                   className={`boom-select text-xs py-1.5 px-3 rounded-lg border-0 ${
                     i.status === 'new' ? 'bg-blue-500/10 text-blue-400' : 
                     i.status === 'in-progress' ? 'bg-amber-500/10 text-amber-400' :
@@ -753,7 +786,15 @@ function InquiryManager({ inquiries, refresh }: any) {
                   <option value="in-progress">In Progress</option>
                   <option value="resolved">Resolved</option>
                 </select>
-                <button onClick={() => { if(confirm('Delete inquiry?')) deleteInquiry(i.id).then(refresh) }} className="p-2 rounded-lg bg-red-400/10 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => { 
+                    if(confirm('Delete inquiry?')) {
+                      const action = i.requirement.toLowerCase().includes('event') ? deleteEventInquiry : deleteInquiry;
+                      action(i.id).then(refresh);
+                    }
+                  }} 
+                  className="p-2 rounded-lg bg-red-400/10 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -773,7 +814,7 @@ function InquiryManager({ inquiries, refresh }: any) {
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-bold">Details</p>
                 <p className="text-sm text-foreground">
-                  {(i as any).budget ? `Budget: ${(i as any).budget}` : (i as any).quantity ? `Quantity: ${(i as any).quantity}` : `${i.items?.length || 0} cart items`}
+                  {(i as any).budget ? `Budget: ${(i as any).budget}` : (i as any).quantity ? `Quantity: ${(i as any).quantity}` : `${i.items?.length || 0} items`}
                 </p>
               </div>
             </div>
@@ -802,7 +843,6 @@ function ProfileManager({ user, setUser }: { user: AdminUser | null, setUser: (u
     if (!user) return;
     setLoading(true);
     try {
-      const { updateAdminProfile } = await import('@/api/admin');
       const res = await updateAdminProfile(user.id, { username });
       setUser(res.user);
       toast({ title: 'Success', description: 'Profile updated' });
@@ -818,7 +858,6 @@ function ProfileManager({ user, setUser }: { user: AdminUser | null, setUser: (u
     if (!password || !user) return;
     setLoading(true);
     try {
-      const { updateAdminPassword } = await import('@/api/admin');
       await updateAdminPassword(user.id, password);
       setPassword('');
       toast({ title: 'Success', description: 'Password updated' });

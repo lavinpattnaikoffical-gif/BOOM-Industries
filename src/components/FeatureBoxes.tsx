@@ -12,7 +12,7 @@ const features = [
   {
     icon: Phone,
     title: 'Get a Quote',
-    description: 'Planning an event or stocking up? Get personalized pricing tailored to your budget. Retail, bulk, or event — we have the best rates in Latur.',
+    description: 'Planning an event or stocking up? Get personalized pricing tailored to your budget. Retail, bulk, or event — we have the best rates in India.',
     cta: 'Inquire Now →',
     color: '#ef4444',
     glowColor: 'rgba(239,68,68,0.2)',
@@ -32,7 +32,7 @@ const features = [
   {
     icon: Play,
     title: 'Watch Our Work',
-    description: "Watch our spectacular firework displays and event highlights. See why Boom Industries lights up Latur's biggest celebrations.",
+    description: "Watch our spectacular firework displays and event highlights. See why Boom Industries lights up India's biggest celebrations.",
     cta: 'Open Gallery →',
     color: '#16a34a',
     glowColor: 'rgba(22,163,74,0.2)',

@@ -292,6 +292,13 @@ app.put('/api/events/inquiries/:id', authMiddleware, async (req, res) => {
   } catch (err) { console.error(err); res.status(500).send('Server Error'); }
 });
 
+app.delete('/api/events/inquiries/:id', authMiddleware, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM event_inquiries WHERE id = $1', [req.params.id]);
+    res.json({ msg: 'Event inquiry removed' });
+  } catch (err) { console.error(err); res.status(500).send('Server Error'); }
+});
+
 // ADMINS //
 app.get('/api/admins', [authMiddleware, superAdminMiddleware], async (req, res) => {
   try {

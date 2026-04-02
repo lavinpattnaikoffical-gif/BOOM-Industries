@@ -70,7 +70,10 @@ const App = () => (
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <WhatsAppFloatingButton />
+          <Routes>
+            <Route path="/admin" element={null} />
+            <Route path="*" element={<WhatsAppFloatingButton />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </InquiryProvider>

@@ -7,7 +7,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"node server/server.js\"",
     "build": "vite build",
     "postinstall": "cd server && npm install",
     "start": "node server/server.js"

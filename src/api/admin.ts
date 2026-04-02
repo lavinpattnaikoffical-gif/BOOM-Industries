@@ -90,7 +90,7 @@ export const fetchInquiries = async (): Promise<Lead[]> => {
 
 export const submitInquiry = async (data: InquiryFormData): Promise<InquirySubmissionResponse> => {
   const res = await axios.post(`${API_URL}/inquiries`, data);
-  return { id: res.data._id, success: true, message: 'Inquiry submitted', timestamp: res.data.createdAt };
+  return { id: res.data.id, success: true, message: 'Inquiry submitted', timestamp: res.data.createdAt };
 };
 
 export const updateInquiryStatus = async (id: string, status: InquiryStatus): Promise<Lead> => {
@@ -100,6 +100,21 @@ export const updateInquiryStatus = async (id: string, status: InquiryStatus): Pr
 
 export const deleteInquiry = async (id: string): Promise<void> => {
   await axios.delete(`${API_URL}/inquiries/${id}`, getAuthHeaders());
+};
+
+// ── Event Inquiry API ──
+export const fetchEventInquiries = async (): Promise<any[]> => {
+  const res = await axios.get(`${API_URL}/events/inquiries`, getAuthHeaders());
+  return res.data;
+};
+
+export const updateEventInquiryStatus = async (id: string, status: string): Promise<any> => {
+  const res = await axios.put(`${API_URL}/events/inquiries/${id}`, { status }, getAuthHeaders());
+  return res.data;
+};
+
+export const deleteEventInquiry = async (id: string): Promise<void> => {
+  await axios.delete(`${API_URL}/events/inquiries/${id}`, getAuthHeaders());
 };
 
 // ── Admin Management API ──

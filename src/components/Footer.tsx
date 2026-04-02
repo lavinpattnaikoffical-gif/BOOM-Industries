@@ -155,7 +155,7 @@ export default function Footer() {
           style={{ borderTop: '1px solid rgba(72,71,77,0.2)' }}
         >
           <p className="text-xs font-body" style={{ color: 'rgba(172,170,177,0.4)' }}>
-            © 2026 Boom Industries, Latur. All rights reserved.
+            © 2026 Boom Industries, India. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
             {['Privacy Policy', 'Terms', 'Safety Guidelines'].map(item => (

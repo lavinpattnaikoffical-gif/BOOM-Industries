@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SparkCursor from '@/components/SparkCursor';
 import EmberParticles from '@/components/EmberParticles';
+import { submitInquiry } from '@/api/admin';
 
 // WhatsApp business number (update with your number)
 const WHATSAPP_NUMBER = '919876543210';
@@ -30,10 +31,23 @@ export default function Contact() {
     message += `*Phone:* ${form.phone}\n`;
     if (form.message) message += `*Message:* ${form.message}`;
 
-    toast({ title: 'Redirecting to WhatsApp!', description: 'Complete your message on WhatsApp.' });
-    
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    // Save to database
+    try {
+      await submitInquiry({
+        name: form.name,
+        phone: form.phone,
+        requirement: 'Contact Form Inquiry',
+        message: form.message,
+        items: []
+      } as any);
+    } catch (err) {
+      console.error('Failed to submit contact form to DB', err);
+      toast({ title: 'Error', description: 'Failed to send message. Please try calling us.', variant: 'destructive' });
+      setLoading(false);
+      return;
+    }
+
+    toast({ title: 'Message Sent!', description: 'We have received your message and will contact you soon.' });
     
     setForm({ name: '', phone: '', message: '' });
     setLoading(false);
@@ -99,7 +113,7 @@ export default function Contact() {
                   disabled={loading}
                   className="btn-boom-primary w-full py-4 text-base flex items-center justify-center gap-2 group"
                 >
-                  {loading ? 'Sending...' : 'Send to WhatsApp'} <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {loading ? 'Sending...' : 'Send Message'} <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </form>
             </motion.div>
