@@ -18,10 +18,31 @@ export function useScrollReveal() {
       { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
     );
 
+    // Use MutationObserver to watch for dynamically added elements
+    const mutationObserver = new MutationObserver(() => {
+      const targets = el.querySelectorAll('.reveal:not(.revealed), .reveal-left:not(.revealed), .reveal-right:not(.revealed)');
+      targets.forEach((t) => {
+        if (!observer.takeRecords().some(r => r.target === t)) {
+          observer.observe(t);
+        }
+      });
+    });
+
+    // Initial query for existing elements
     const targets = el.querySelectorAll('.reveal, .reveal-left, .reveal-right');
     targets.forEach((t) => observer.observe(t));
 
-    return () => observer.disconnect();
+    // Watch for new elements being added to the section
+    mutationObserver.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, []);
 
   return ref;
