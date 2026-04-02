@@ -54,6 +54,13 @@ export default function ProductsSection() {
 
   const filtered = (active === 'All' ? products : products.filter(p => p.category === active)).slice(0, 6);
 
+  // Fallback products if DB is empty
+  const displayProducts = filtered.length > 0 ? filtered : [
+    { id: 'f1', name: 'Premium Sky Rocket', category: 'Rockets', price: '₹450', image: 'https://images.unsplash.com/photo-1533230408703-a2321476c827?auto=format&fit=crop&q=80', rating: '4.8' },
+    { id: 'f2', name: 'Golden Sparklers', category: 'Sparklers', price: '₹150', image: 'https://images.unsplash.com/photo-1467810563316-b54765359382?auto=format&fit=crop&q=80', rating: '4.5' },
+    { id: 'f3', name: 'Silver Fountain', category: 'Fountains', price: '₹280', image: 'https://images.unsplash.com/photo-1533230119143-d10ee7b00951?auto=format&fit=crop&q=80', rating: '4.7' }
+  ];
+
   return (
     <section id="products" className="relative py-24" ref={ref}
              style={{ background: '#0e0e13' }}>
@@ -91,9 +98,9 @@ export default function ProductsSection() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-          {filtered.map((p, i) => (
+          {displayProducts.map((p, i) => (
             <div
-              key={p.id || p.name + i}
+              key={p.id || i}
               className="reveal boom-card rounded-2xl overflow-hidden cursor-pointer"
               style={{
                 border: `1px solid ${getGlowColor(p.category)}18`,
@@ -133,7 +140,7 @@ export default function ProductsSection() {
                 <div className="flex items-center justify-between">
                   <span className="font-display font-bold text-xl" style={{ color: getGlowColor(p.category) }}>{p.price}</span>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); handleAddInquiry(p); }}
+                    onClick={(e) => { e.stopPropagation(); handleAddInquiry(p as any); }}
                     className="px-3.5 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-300"
                     style={{ background: `${getGlowColor(p.category)}15`, border: `1px solid ${getGlowColor(p.category)}35`, color: getGlowColor(p.category) }}>
                     Add to Inquiry
