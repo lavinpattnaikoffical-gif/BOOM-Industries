@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { X, Phone, User, MapPin, Package, Loader2, MessageSquare } from 'lucide-react';
+import { X, Phone, User, MapPin, Package, Loader2, MessageSquare, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useInquiryCart } from '@/contexts/InquiryContext';
 import { submitInquiry } from '@/api/admin';
 
 // WhatsApp business number (update with your number)
-const WHATSAPP_NUMBER = '919876543210';
+const WHATSAPP_NUMBER = '919922097669';
 
 interface InquiryModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const { items, removeItem, clearCart } = useInquiryCart();
 
   // Close on ESC
   useEffect(() => {
@@ -59,19 +61,22 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
 
     setSubmitting(true);
 
-    // Build WhatsApp message
-    let message = `*New Inquiry*\n\n`;
-    message += `*Name:* ${form.name}\n`;
-    message += `*Phone:* ${form.phone}\n`;
-    if (form.city) message += `*City:* ${form.city}\n`;
-    if (form.requirement) {
-      const reqLabel = requirements.find(r => r.value === form.requirement)?.label || form.requirement;
-      message += `*Requirement:* ${reqLabel}`;
-    }
+    const reqLabel = requirements.find(r => r.value === form.requirement)?.label || form.requirement || 'General';
 
-    // Open WhatsApp (Removed redirect logic)
-    // const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    // window.open(whatsappUrl, '_blank');
+    // Build WhatsApp message
+    let waMessage = `*New Inquiry via Website*\n\n`;
+    waMessage += `*Name:* ${form.name}\n`;
+    waMessage += `*Phone:* ${form.phone}\n`;
+    if (form.city) waMessage += `*City:* ${form.city}\n`;
+    waMessage += `*Type:* ${reqLabel}\n\n`;
+
+    if (items.length > 0) {
+      waMessage += `*Selected Products:*\n`;
+      items.forEach((item, idx) => {
+        waMessage += `${idx + 1}. ${item.productName} (${item.quantity} units)\n`;
+      });
+      waMessage += `\n`;
+    }
 
     // Save to database
     try {
@@ -79,9 +84,9 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
         name: form.name,
         phone: form.phone,
         city: form.city,
-        requirement: form.requirement || 'Retail',
-        items: [],
-        message: `Requirement Type: ${form.requirement}`
+        requirement: reqLabel,
+        items: items, // Include the cart items!
+        message: items.length > 0 ? `Cart: ${items.map(i => i.productName).join(', ')}` : 'Contact Form'
       } as any);
     } catch (err) {
       console.error('Failed to submit inquiry to db', err);
@@ -94,12 +99,17 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       return;
     }
 
+    // Open WhatsApp
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
+    window.open(whatsappUrl, '_blank');
+
     toast({
-      title: '🎆 Quote Request Received!',
-      description: 'We will get back to you with the best prices shortly.',
+      title: '🎆 Inquiry Sent Root Successfully!',
+      description: 'Your request has been logged and WhatsApp opened.',
     });
 
     setForm({ name: '', phone: '', city: '', requirement: '' });
+    clearCart();
     setSubmitting(false);
     onClose();
   };
@@ -135,7 +145,33 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto max-h-[70vh]">
+          {/* Product Items List (Added) */}
+          {items.length > 0 && (
+            <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20">
+              <h3 className="text-sm font-display font-bold text-primary mb-3 flex items-center gap-2">
+                <Package className="w-4 h-4" /> Selected Products ({items.length})
+              </h3>
+              <div className="space-y-2">
+                {items.map((item) => (
+                  <div key={item.productId} className="flex items-center justify-between bg-black/20 p-2.5 rounded-lg border border-white/5">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{item.productName}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">{item.category} • {item.price}</p>
+                    </div>
+                    <button 
+                      onClick={() => removeItem(item.productId)}
+                      className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"
+                      title="Remove"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
             <div>

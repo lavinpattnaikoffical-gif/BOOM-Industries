@@ -9,6 +9,7 @@ import Navbar from '@/components/Navbar';
 import EmberParticles from '@/components/EmberParticles';
 import SparkCursor from '@/components/SparkCursor';
 import Footer from '@/components/Footer';
+import InquiryModal from '@/components/InquiryModal';
 import productSparklers from '@/assets/product-sparklers.jpg';
 import productRockets from '@/assets/product-rockets.jpg';
 import productFountains from '@/assets/product-fountains.jpg';
@@ -397,6 +398,7 @@ export default function Products() {
       </section>
 
       <Footer />
+      <InquiryModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
 }
