@@ -1,21 +1,14 @@
 import { useState, useEffect } from 'react';
 import { fetchProducts } from '@/api/admin';
 import { Product } from '@/types';
-
+import { useInquiryCart } from '@/contexts/InquiryContext';
+import { useToast } from '@/hooks/use-toast';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import productSparklers from '@/assets/product-sparklers.jpg';
-import productRockets from '@/assets/product-rockets.jpg';
-import productFountains from '@/assets/product-fountains.jpg';
-import productCrackers from '@/assets/product-crackers.jpg';
-
-// Categories will be derived from products
-
-
-// Static fallback removed, now using API
-
 
 export default function ProductsSection() {
   const ref = useScrollReveal();
+  const { addItem } = useInquiryCart();
+  const { toast } = useToast();
   const [active, setActive] = useState('All');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,18 +37,30 @@ export default function ProductsSection() {
     }
   };
 
-  const filtered = (active === 'All' ? products : products.filter(p => p.category === active)).slice(0, 6);
+  const handleAddInquiry = (p: Product) => {
+    addItem({
+      productId: p.id,
+      productName: p.name,
+      category: p.category,
+      price: p.price,
+      quantity: 1
+    });
+    toast({
+      title: 'Added to Inquiry!',
+      description: `${p.name} added to your inquiry list. Check the navbar to submit.`,
+      duration: 3000
+    });
+  };
 
+  const filtered = (active === 'All' ? products : products.filter(p => p.category === active)).slice(0, 6);
 
   return (
     <section id="products" className="relative py-24" ref={ref}
              style={{ background: '#0e0e13' }}>
-      {/* BG glow */}
       <div className="absolute inset-0 pointer-events-none"
            style={{ background: 'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(245,184,0,0.03) 0%, transparent 70%)' }} />
 
       <div className="container mx-auto px-5 relative">
-        {/* Header */}
         <div className="text-center mb-14 reveal">
           <span className="boom-pill">All Products</span>
           <h2 className="font-display font-bold mt-4"
@@ -67,7 +72,6 @@ export default function ProductsSection() {
           </p>
         </div>
 
-        {/* Category Filter */}
         <div className="reveal flex flex-wrap justify-center gap-2.5 mb-10">
           {['All', ...new Set(products.map(p => p.category))].map(cat => (
             <button
@@ -86,12 +90,10 @@ export default function ProductsSection() {
           ))}
         </div>
 
-
-        {/* Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
           {filtered.map((p, i) => (
             <div
-              key={p.name + i}
+              key={p.id || p.name + i}
               className="reveal boom-card rounded-2xl overflow-hidden cursor-pointer"
               style={{
                 border: `1px solid ${getGlowColor(p.category)}18`,
@@ -111,31 +113,17 @@ export default function ProductsSection() {
                 el.style.boxShadow = '';
                 el.style.transform = 'translateY(0)';
               }}
-
             >
-              {/* Image */}
               <div className="relative overflow-hidden">
-                <img src={p.image} alt={p.name}
-                     className="w-full h-52 object-cover transition-transform duration-500"
-                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.08)'; }}
-                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
-                />
+                <img src={p.image} alt={p.name} className="w-full h-52 object-cover transition-transform duration-500" />
                 <div className="absolute inset-0"
                      style={{ background: 'linear-gradient(to top, rgba(14,14,19,0.9) 0%, transparent 55%)' }} />
-                {/* Rating */}
                 <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-display font-bold"
                      style={{ background: 'rgba(14,14,19,0.8)', backdropFilter: 'blur(8px)', border: `1px solid ${getGlowColor(p.category)}40`, color: getGlowColor(p.category) }}>
                   ★ {p.rating || '4.5'}
                 </div>
-                {/* Tag */}
-                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-display font-bold tracking-wider uppercase"
-                     style={{ background: `${getGlowColor(p.category)}20`, border: `1px solid ${getGlowColor(p.category)}40`, color: getGlowColor(p.category) }}>
-                  {p.category === 'Rockets' ? 'Top Pick' : 'Popular'}
-                </div>
-
               </div>
 
-              {/* Info */}
               <div className="p-5">
                 <span className="text-[11px] font-body tracking-wider uppercase"
                       style={{ color: 'rgba(172,170,177,0.6)' }}>{p.category}</span>
@@ -144,18 +132,18 @@ export default function ProductsSection() {
                 </h3>
                 <div className="flex items-center justify-between">
                   <span className="font-display font-bold text-xl" style={{ color: getGlowColor(p.category) }}>{p.price}</span>
-                  <button className="px-3.5 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-300"
-                           style={{ background: `${getGlowColor(p.category)}15`, border: `1px solid ${getGlowColor(p.category)}35`, color: getGlowColor(p.category) }}>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleAddInquiry(p); }}
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-display font-semibold transition-all duration-300"
+                    style={{ background: `${getGlowColor(p.category)}15`, border: `1px solid ${getGlowColor(p.category)}35`, color: getGlowColor(p.category) }}>
                     Add to Inquiry
                   </button>
                 </div>
-
               </div>
             </div>
           ))}
         </div>
 
-        {/* View All */}
         <div className="text-center mt-10 reveal">
           <a href="/products" className="btn-boom-primary">
             View Full Catalog — 700+ Products

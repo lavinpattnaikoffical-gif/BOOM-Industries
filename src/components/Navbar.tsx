@@ -66,6 +66,24 @@ export default function Navbar({ onContactClick }: NavbarProps) {
 
         {/* ── Desktop CTAs ── */}
         <div className="hidden md:flex items-center gap-3">
+          {itemCount > 0 && (
+            <button
+              onClick={onContactClick}
+              className="relative flex items-center justify-center w-10 h-10 rounded-lg text-sm transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'rgba(245,184,0,0.1)',
+                border: '1px solid rgba(245,184,0,0.3)',
+                color: '#f5b800',
+              }}
+              title="View Inquiry List"
+            >
+              🛒
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary text-black text-[10px] font-bold flex items-center justify-center shadow-lg">
+                {itemCount}
+              </span>
+            </button>
+          )}
+
           {/* Instagram Link */}
           <a
             href="https://instagram.com/boom_fireworks_official"
