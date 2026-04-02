@@ -21,6 +21,8 @@ import {
   TrendingUp,
   MessageSquare,
   ShieldCheck,
+  Zap,
+  RefreshCw,
   Image as ImageIcon,
   Download,
   Eye
@@ -345,8 +347,16 @@ export default function Admin() {
 
         {/* Tab Content */}
         <div className="p-8">
-          {activeTab === 'dashboard' && <DashboardView products={products} events={events} inquiries={inquiries} />}
-          {activeTab === 'products' && (
+          {activeTab === 'dashboard' && (
+            <DashboardView 
+              products={products} 
+              events={events} 
+              inquiries={inquiries} 
+              setActiveTab={setActiveTab} 
+              loadData={loadData} 
+            />
+          )}
+        {activeTab === 'products' && (
             <GenericManager 
               title="Product" 
               items={products} 
@@ -423,7 +433,7 @@ export default function Admin() {
 
 // ── Dashboard View ──
 
-function DashboardView({ products, events, inquiries }: any) {
+function DashboardView({ products, events, inquiries, setActiveTab, loadData }: any) {
   const newInquiries = inquiries.filter((i: Lead) => i.status === 'new').length;
   
   return (
@@ -433,6 +443,33 @@ function DashboardView({ products, events, inquiries }: any) {
         <StatCard icon={MessageSquare} label="New Inquiries" value={newInquiries} color="bg-blue-500" trend={`${inquiries.length} total`} />
         <StatCard icon={Calendar} label="Total Events" value={events.length} color="bg-ember" trend="+2 upcoming" />
         <StatCard icon={ShieldCheck} label="Admin Users" value="2" color="bg-green-500" />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="glass-card rounded-2xl p-6 border border-white/5 bg-gradient-to-br from-primary/5 to-transparent">
+        <h3 className="text-lg font-display font-bold mb-4 flex items-center gap-2">
+          <Zap className="w-5 h-5 text-primary" /> Quick Actions
+        </h3>
+        <div className="flex flex-wrap gap-4">
+          <button 
+            onClick={() => setActiveTab('products')} 
+            className="btn-boom-primary flex items-center gap-2 px-6 py-3"
+          >
+            <Plus className="w-4 h-4" /> Add New Product
+          </button>
+          <button 
+            onClick={() => setActiveTab('events')} 
+            className="bg-white/5 hover:bg-white/10 text-foreground border border-white/10 px-6 py-3 rounded-xl transition-all flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Add New Event
+          </button>
+          <button 
+            onClick={loadData}
+            className="bg-white/5 hover:bg-white/10 text-foreground border border-white/10 px-6 py-3 rounded-xl transition-all flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" /> Refresh All Data
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

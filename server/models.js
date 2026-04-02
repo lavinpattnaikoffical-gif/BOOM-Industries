@@ -86,6 +86,32 @@ async function initDatabase() {
 
       ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS product_name VARCHAR(255);
     `);
+
+    // Seed default admin if none exists
+    const adminCheck = await client.query('SELECT * FROM admins LIMIT 1');
+    if (adminCheck.rows.length === 0) {
+      const hashedPassword = await require('bcryptjs').hash('admin123', 10);
+      await client.query('INSERT INTO admins (username, password, role) VALUES ($1, $2, $3)', ['admin', hashedPassword, 'super']);
+      console.log('Default admin seeded: admin / admin123');
+    }
+
+    // Seed initial products if none exist
+    const productCheck = await client.query('SELECT * FROM products LIMIT 1');
+    if (productCheck.rows.length === 0) {
+      const initialProducts = [
+        ['Pro Rockets', '₹450', 'Rockets', 'High altitude sky rockets with gold glitter trails.', 'https://images.unsplash.com/photo-1533230408703-a2321476c827?auto=format&fit=crop&q=80', '4.8'],
+        ['Gold Sparklers', '₹150', 'Sparklers', 'Classic long-burning golden sparklers.', 'https://images.unsplash.com/photo-1467810563316-b54765359382?auto=format&fit=crop&q=80', '4.5'],
+        ['Silver Fountain', '₹280', 'Fountains', 'High-intensity silver fountain with purple stars.', 'https://images.unsplash.com/photo-1533230119143-d10ee7b00951?auto=format&fit=crop&q=80', '4.7'],
+        ['Heavy Crackers', '₹350', 'Crackers', 'Loud banging crackers for festive celebrations.', 'https://images.unsplash.com/photo-1507119141445-565492d6e6ab?auto=format&fit=crop&q=80', '4.4'],
+        ['Fancy Aerial', '₹1200', 'Rockets', 'Multicolor aerial shells with massive break.', 'https://images.unsplash.com/photo-1498910145784-efc7188f6140?auto=format&fit=crop&q=80', '4.9'],
+        ['Flower Pot', '₹200', 'Fountains', 'Smooth golden sparks for children safety.', 'https://images.unsplash.com/photo-1545199698-10659be83be2?auto=format&fit=crop&q=80', '4.6']
+      ];
+      for (const p of initialProducts) {
+        await client.query('INSERT INTO products (name, price, category, description, image, rating) VALUES ($1, $2, $3, $4, $5, $6)', p);
+      }
+      console.log('Default products seeded');
+    }
+
     console.log('Database tables initialized');
   } finally {
     client.release();
