@@ -38,9 +38,8 @@ function CountdownBlock({ value, label, color }: { value: number; label: string;
 
   return (
     <div
-      className="glass-card rounded-2xl p-6 md:p-8 text-center"
+      className="glass-card rounded-2xl p-4 sm:p-6 md:p-8 text-center w-full"
       style={{
-        minWidth: '110px',
         border: `1px solid ${color}22`,
         boxShadow: `0 0 40px ${color}10`,
       }}
@@ -121,7 +120,7 @@ export default function CountdownSection() {
           </p>
         </div>
 
-        <div className="reveal flex flex-wrap justify-center gap-4 md:gap-6">
+        <div className="reveal grid grid-cols-2 sm:grid-cols-4 max-w-2xl mx-auto gap-3.5 sm:gap-6">
           {units.map((u, i) => (
             <CountdownBlock
               key={u.label}

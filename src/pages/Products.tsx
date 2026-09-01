@@ -251,75 +251,78 @@ export default function Products() {
       </section>
 
       {/* Filters Section */}
-      <section className="relative py-8 border-t border-b border-border/20" ref={ref}>
-        <div className="container mx-auto px-6">
+      <section className="relative py-6 sm:py-8 border-t border-b border-border/20" ref={ref}>
+        <div className="container mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="reveal grid md:grid-cols-3 gap-6"
+            className="reveal space-y-5"
           >
-            {/* Category Filter */}
+            {/* Category Filter Pills (Horizontal scrollable on mobile) */}
             <div>
-              <label className="text-xs font-body text-primary tracking-widest uppercase mb-3 block">
-                Category
-              </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center justify-between mb-2.5">
+                <label className="text-xs font-body text-primary font-semibold tracking-widest uppercase block">
+                  Category Filter
+                </label>
+                <span className="text-[11px] text-muted-foreground sm:hidden">Swipe →</span>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full no-scrollbar">
                 {getCategoriesFromProducts(products).map((cat) => (
-                  <motion.button
+                  <button
                     key={cat}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-lg text-sm font-body font-medium transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-body font-semibold whitespace-nowrap transition-all duration-200 ${
                       selectedCategory === cat
-                        ? 'bg-primary text-primary-foreground glow-sm'
+                        ? 'bg-primary text-night-deep font-bold shadow-md shadow-primary/30'
                         : 'bg-night-surface text-muted-foreground hover:text-foreground border border-border/50 hover:border-primary/30'
                     }`}
                   >
                     {cat}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </div>
 
-
-            {/* Price Filter */}
-            <div>
-              <label className="text-xs font-body text-primary tracking-widest uppercase mb-3 block">
-                Price Range
-              </label>
-              <select
-                value={selectedPriceRange}
-                onChange={(e) => setSelectedPriceRange(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-night-surface border border-border/50 text-foreground text-sm outline-none focus:border-primary/50 transition-colors"
-              >
-                {PRICE_RANGES.map((range) => (
-                  <option key={range.label} value={range.label}>
-                    {range.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort */}
-            <div>
-              <label className="text-xs font-body text-primary tracking-widest uppercase mb-3 block">
-                Sort By
-              </label>
-              <div className="relative">
+            {/* Price & Sort Filter Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Price Filter */}
+              <div>
+                <label className="text-xs font-body text-primary font-semibold tracking-widest uppercase mb-2 block">
+                  Price Range
+                </label>
                 <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg bg-night-surface border border-border/50 text-foreground text-sm outline-none focus:border-primary/50 transition-colors appearance-none"
+                  value={selectedPriceRange}
+                  onChange={(e) => setSelectedPriceRange(e.target.value)}
+                  className="boom-select w-full text-xs sm:text-sm"
                 >
-                  <option value="featured">Featured</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Top Rated</option>
+                  {PRICE_RANGES.map((range) => (
+                    <option key={range.label} value={range.label}>
+                      {range.label}
+                    </option>
+                  ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="text-xs font-body text-primary font-semibold tracking-widest uppercase mb-2 block">
+                  Sort By
+                </label>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="boom-select w-full text-xs sm:text-sm appearance-none pr-9"
+                  >
+                    <option value="featured">Featured</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="rating">Top Rated</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                </div>
               </div>
             </div>
           </motion.div>

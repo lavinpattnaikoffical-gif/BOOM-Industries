@@ -458,3 +458,21 @@
   66%  { box-shadow: 0 0 25px rgba(22,163,74,0.35); }
   100% { box-shadow: 0 0 20px rgba(239,68,68,0.3); }
 }
+
+/* Mobile Utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+

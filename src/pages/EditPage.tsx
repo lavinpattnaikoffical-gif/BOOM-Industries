@@ -442,14 +442,22 @@ export default function EditPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
+              <button
+                onClick={handleOpenAdd}
+                className="col-span-2 sm:col-span-1 btn-boom-primary px-4 py-2.5 text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+              >
+                <Plus className="w-4 h-4" />
+                Add Product
+              </button>
+
               <button
                 onClick={() => setIsCodeModalOpen(true)}
-                className="px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-display font-semibold bg-white/5 hover:bg-white/10 border border-white/15 text-foreground flex items-center gap-2 transition-all"
-                title="Export updated products as code for permanent Vercel deployment"
+                className="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-display font-semibold bg-white/5 hover:bg-white/10 border border-white/15 text-foreground flex items-center justify-center gap-1.5 transition-all"
+                title="Export updated products as code"
               >
-                <FileCode className="w-4 h-4 text-primary" />
-                Export Code
+                <FileCode className="w-3.5 h-3.5 text-primary" />
+                Export
               </button>
 
               <button
@@ -459,7 +467,7 @@ export default function EditPage() {
                     toast({ title: 'Reset Successful', description: 'Restored original default product catalog.' });
                   }
                 }}
-                className="px-3 py-2.5 rounded-xl text-xs md:text-sm font-display font-medium bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 flex items-center gap-1.5 transition-all"
+                className="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-display font-medium bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 flex items-center justify-center gap-1.5 transition-all"
                 title="Restore default catalog"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -467,70 +475,63 @@ export default function EditPage() {
               </button>
 
               <button
-                onClick={handleOpenAdd}
-                className="btn-boom-primary px-4 py-2.5 text-xs md:text-sm flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-              >
-                <Plus className="w-4 h-4" />
-                Add Product
-              </button>
-
-              <button
                 onClick={handleLogout}
-                className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-muted-foreground hover:text-red-400 border border-white/10 transition-all"
+                className="col-span-2 sm:col-span-1 p-2.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-muted-foreground hover:text-red-400 border border-white/10 flex items-center justify-center gap-1.5 text-xs transition-all"
                 title="Lock session & Logout"
               >
                 <LogOut className="w-4 h-4" />
+                <span className="sm:hidden">Lock & Logout</span>
               </button>
             </div>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-            <div className="glass-card p-4 rounded-2xl border border-white/5 flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                <Sparkles className="w-5 h-5" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="glass-card p-3 sm:p-4 rounded-2xl border border-white/5 flex items-center gap-2.5 sm:gap-3.5">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-2xl font-bold font-display text-foreground">{products.length}</div>
-                <div className="text-xs text-muted-foreground">Total Products</div>
+                <div className="text-xl sm:text-2xl font-bold font-display text-foreground">{products.length}</div>
+                <div className="text-[11px] sm:text-xs text-muted-foreground">Total Products</div>
               </div>
             </div>
 
-            <div className="glass-card p-4 rounded-2xl border border-white/5 flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                <Tag className="w-5 h-5" />
+            <div className="glass-card p-3 sm:p-4 rounded-2xl border border-white/5 flex items-center gap-2.5 sm:gap-3.5">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">
+                <Tag className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-2xl font-bold font-display text-foreground">{categoriesList.length - 1}</div>
-                <div className="text-xs text-muted-foreground">Active Categories</div>
+                <div className="text-xl sm:text-2xl font-bold font-display text-foreground">{categoriesList.length - 1}</div>
+                <div className="text-[11px] sm:text-xs text-muted-foreground">Categories</div>
               </div>
             </div>
 
-            <div className="glass-card p-4 rounded-2xl border border-white/5 flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400">
-                <IndianRupee className="w-5 h-5" />
+            <div className="glass-card p-3 sm:p-4 rounded-2xl border border-white/5 flex items-center gap-2.5 sm:gap-3.5">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 flex-shrink-0">
+                <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-sm font-bold font-display text-foreground">Live Synced</div>
-                <div className="text-xs text-muted-foreground">Browser Storage</div>
+                <div className="text-xs sm:text-sm font-bold font-display text-foreground">Live Synced</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Browser Storage</div>
               </div>
             </div>
 
             <div 
               onClick={() => navigate('/products')}
-              className="glass-card p-4 rounded-2xl border border-primary/20 hover:border-primary/50 cursor-pointer flex items-center justify-between group transition-all"
+              className="glass-card p-3 sm:p-4 rounded-2xl border border-primary/20 hover:border-primary/50 cursor-pointer flex items-center justify-between group transition-all"
             >
               <div>
-                <div className="text-xs font-semibold text-primary uppercase tracking-wider">Storefront</div>
-                <div className="text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
-                  View Catalog <ExternalLink className="w-3.5 h-3.5" />
+                <div className="text-[10px] sm:text-xs font-semibold text-primary uppercase tracking-wider">Storefront</div>
+                <div className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
+                  View Catalog <ExternalLink className="w-3 h-3" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Search and Category Tabs */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5 mb-6">
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -539,7 +540,7 @@ export default function EditPage() {
                 placeholder="Search products by name or category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="boom-input pl-10 w-full text-sm"
+                className="boom-input pl-10 w-full text-xs sm:text-sm py-2.5"
               />
               {searchTerm && (
                 <button
@@ -552,7 +553,7 @@ export default function EditPage() {
             </div>
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full no-scrollbar">
               {categoriesList.map((cat) => (
                 <button
                   key={cat}
