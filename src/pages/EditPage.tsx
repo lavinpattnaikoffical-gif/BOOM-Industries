@@ -26,13 +26,17 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  LogOut
+  LogOut,
+  Globe,
+  Send,
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/contexts/ProductContext';
 import { Product } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { formatGoogleDriveUrl, isGoogleDriveUrl } from '@/utils/imageHelper';
+import { publishProductsToGitHub, getStoredGitHubToken } from '@/utils/githubSync';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SparkCursor from '@/components/SparkCursor';
@@ -105,6 +109,11 @@ export default function EditPage() {
   // Code Export Modal
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  // GitHub Publish Modal (Global deployment)
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [githubToken, setGithubToken] = useState(() => getStoredGitHubToken());
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -293,6 +302,39 @@ export default function EditPage() {
     toast({ title: 'File Downloaded', description: 'products.ts saved to your downloads.' });
   };
 
+  // Publish to GitHub & trigger global Vercel live deployment
+  const handlePublishToGitHub = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!githubToken.trim()) {
+      toast({
+        title: 'Token Required',
+        description: 'Please provide your GitHub Personal Access Token.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsPublishing(true);
+    const result = await publishProductsToGitHub(products, githubToken.trim());
+    setIsPublishing(false);
+
+    if (result.success) {
+      toast({
+        title: '🚀 Published Globally to Website!',
+        description: result.message,
+        duration: 8000,
+      });
+      setIsPublishModalOpen(false);
+    } else {
+      toast({
+        title: 'Publish Failed',
+        description: result.message,
+        variant: 'destructive',
+        duration: 7000,
+      });
+    }
+  };
+
   // Filter products list
   const categoriesList = ['All', ...new Set(products.map((p) => p.category))];
   const filteredProducts = products.filter((p) => {
@@ -444,8 +486,17 @@ export default function EditPage() {
 
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
               <button
+                onClick={() => setIsPublishModalOpen(true)}
+                className="col-span-2 sm:col-span-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-display font-bold bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-400 hover:to-red-400 text-night-deep flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20 hover:scale-105 transition-all"
+                title="Publish changes globally to GitHub & Vercel"
+              >
+                <Globe className="w-4 h-4" />
+                Publish Live Globally 🚀
+              </button>
+
+              <button
                 onClick={handleOpenAdd}
-                className="col-span-2 sm:col-span-1 btn-boom-primary px-4 py-2.5 text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                className="btn-boom-primary px-4 py-2.5 text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
               >
                 <Plus className="w-4 h-4" />
                 Add Product
@@ -971,7 +1022,113 @@ export default function EditPage() {
         )}
       </AnimatePresence>
 
+      {/* ================= PUBLISH GLOBALLY MODAL ================= */}
+      <AnimatePresence>
+        {isPublishModalOpen && (
+          <div className="modal-overlay z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="modal-box max-w-xl w-full max-h-[90vh] overflow-y-auto bg-night-deep border border-primary/30 rounded-3xl p-6 md:p-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Globe className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-display font-bold text-foreground">Publish Live to Website</h2>
+                    <p className="text-xs text-muted-foreground">
+                      Deploy your catalog globally so all users across the world see it.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsPublishModalOpen(false)}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handlePublishToGitHub} className="space-y-4">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-muted-foreground space-y-2">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <span>⚡ How Global 1-Click Publish Works:</span>
+                  </div>
+                  <p>
+                    1. When you click <strong>Deploy Live</strong>, your catalog ({products.length} products) will be committed to your GitHub repo (<code>lavinpattnaikoffical-gif/BOOM-Industries</code>).
+                  </p>
+                  <p>
+                    2. Vercel automatically detects the commit and updates the live website worldwide within ~15 seconds!
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      GitHub Personal Access Token
+                    </label>
+                    <a
+                      href="https://github.com/settings/tokens/new?scopes=repo&description=BOOM%20Industries%20Product%20Manager"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-primary hover:underline flex items-center gap-1"
+                    >
+                      Create Token in 1-Click <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                  <input
+                    type="password"
+                    placeholder="github_pat_... or ghp_..."
+                    value={githubToken}
+                    onChange={(e) => setGithubToken(e.target.value)}
+                    className="boom-input w-full text-xs sm:text-sm font-mono py-3"
+                    required
+                  />
+                  <p className="text-[11px] text-muted-foreground mt-1.5">
+                    Saved securely in your browser so you only enter it once. Requires <code className="text-primary">repo</code> or <code className="text-primary">contents:write</code> scope.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsPublishModalOpen(false)}
+                    className="px-4 py-3 rounded-xl text-xs sm:text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/15 text-muted-foreground hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={isPublishing}
+                    className="flex-1 btn-boom-primary py-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/25 disabled:opacity-50"
+                  >
+                    {isPublishing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Deploying to GitHub & Vercel...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="w-4 h-4" />
+                        <span>Deploy {products.length} Products Live Globally 🚀</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   );
 }
+
