@@ -3,6 +3,7 @@ import { X, Phone, User, MapPin, Package, Loader2, MessageSquare, Trash2 } from 
 import { useToast } from '@/hooks/use-toast';
 import { useInquiryCart } from '@/contexts/InquiryContext';
 import { submitInquiry } from '@/api/admin';
+import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 // WhatsApp business number (update with your number)
 const WHATSAPP_NUMBER = '919922097669';
@@ -78,34 +79,29 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       waMessage += `\n`;
     }
 
-    // Save to database
-    try {
-      await submitInquiry({
-        name: form.name,
-        phone: form.phone,
-        city: form.city,
-        requirement: reqLabel,
-        items: items, // Include the cart items!
-        message: items.length > 0 ? `Cart: ${items.map(i => i.productName).join(', ')}` : 'Contact Form'
-      } as any);
-    } catch (err) {
-      console.error('Failed to submit inquiry to db', err);
-      toast({
-        title: 'Error',
-        description: 'Failed to save your inquiry. Please call us directly.',
-        variant: 'destructive'
-      });
-      setSubmitting(false);
-      return;
-    }
+    // 1. Forward inquiry via Gmail / Email client
+    sendInquiryViaEmail({
+      name: form.name,
+      phone: form.phone,
+      city: form.city,
+      requirement: reqLabel,
+      items: items,
+      message: items.length > 0 ? `Selected Cart: ${items.map(i => `${i.productName} (${i.quantity})`).join(', ')}` : 'Product Quote Request'
+    });
 
-    // Open WhatsApp
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
-    window.open(whatsappUrl, '_blank');
+    // 2. Also send to serverless API in background if online
+    submitInquiry({
+      name: form.name,
+      phone: form.phone,
+      city: form.city,
+      requirement: reqLabel,
+      items: items,
+      message: items.length > 0 ? `Cart: ${items.map(i => i.productName).join(', ')}` : 'Inquiry'
+    } as any).catch(err => console.log('API notification logged:', err));
 
     toast({
-      title: '🎆 Inquiry Sent Root Successfully!',
-      description: 'Your request has been logged and WhatsApp opened.',
+      title: '✉️ Gmail Opened with Inquiry!',
+      description: 'Your inquiry has been prepared in your email. Simply click Send!',
     });
 
     setForm({ name: '', phone: '', city: '', requirement: '' });

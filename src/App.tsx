@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { InquiryProvider } from "@/contexts/InquiryContext";
+import { ProductProvider } from "@/contexts/ProductContext";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import PageLoader from "./components/PageLoader.tsx";
@@ -15,13 +16,14 @@ const Products = lazy(() => import("./pages/Products.tsx"));
 const Gallery = lazy(() => import("./pages/Gallery.tsx"));
 const WhatWeOffer = lazy(() => import("./pages/WhatWeOffer.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
-const Admin = lazy(() => import("./pages/Admin.tsx"));
+const EditPage = lazy(() => import("./pages/EditPage.tsx"));
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <InquiryProvider>
+    <ProductProvider>
+      <InquiryProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -61,22 +63,38 @@ const App = () => (
               }
             />
             <Route
-              path="/admin"
+              path="/edit_page"
               element={
                 <Suspense fallback={<PageLoader />}>
-                  <Admin />
+                  <EditPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/Edit_page"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <EditPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/edit"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <EditPage />
                 </Suspense>
               }
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Routes>
-            <Route path="/admin" element={null} />
             <Route path="*" element={<WhatsAppFloatingButton />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </InquiryProvider>
+    </ProductProvider>
   </QueryClientProvider>
 );
 

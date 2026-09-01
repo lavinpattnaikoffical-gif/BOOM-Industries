@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,105 +7,9 @@ import EmberParticles from '@/components/EmberParticles';
 import SparkCursor from '@/components/SparkCursor';
 import Footer from '@/components/Footer';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { fetchMedia, fetchEvents } from '@/api/admin';
+import { GALLERY_ITEMS, GalleryItem } from '@/data/gallery';
 
 
-interface GalleryItem {
-  id: string;
-  type: 'image' | 'video';
-  title: string;
-  category: 'product' | 'event' | 'behind-scenes';
-  src: string;
-  thumbnail?: string;
-  videoId?: string;
-  videoPlatform?: 'youtube' | 'instagram';
-  description?: string;
-}
-
-const GALLERY_ITEMS: GalleryItem[] = [
-  {
-    id: 'r1',
-    type: 'video',
-    title: 'Grand Night Display',
-    category: 'event',
-    videoPlatform: 'instagram',
-    videoId: 'DFxGzH2v8XG',
-    src: '',
-    thumbnail: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&h=600&fit=crop',
-    description: 'A spectacular night show captured on Instagram.',
-  },
-  {
-    id: 'r2',
-    type: 'video',
-    title: 'Wedding Celebration',
-    category: 'event',
-    videoPlatform: 'instagram',
-    videoId: 'DJeiciQP2Ws',
-    src: '',
-    thumbnail: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=600&fit=crop',
-    description: 'Adding magic to weddings.',
-  },
-  {
-    id: 'r3',
-    type: 'video',
-    title: 'Festival Burst',
-    category: 'event',
-    videoPlatform: 'instagram',
-    videoId: 'DLPg3xoPvfq',
-    src: '',
-    thumbnail: 'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=800&h=600&fit=crop',
-    description: 'Festivals lit up with Boom Industries.',
-  },
-  {
-    id: 'r4',
-    type: 'video',
-    title: 'Aerial Spectacle',
-    category: 'event',
-    videoPlatform: 'instagram',
-    videoId: 'DLDHg5PPSRH',
-    src: '',
-    thumbnail: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=800&h=600&fit=crop',
-    description: 'Stunning aerial firework displays.',
-  },
-  {
-    id: 'r5',
-    type: 'video',
-    title: 'Corporate Launch',
-    category: 'event',
-    videoPlatform: 'instagram',
-    videoId: 'DEbTU23BlPX',
-    src: '',
-    thumbnail: 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop',
-    description: 'Perfect for grand openings.',
-  },
-  {
-    id: 'r6',
-    type: 'video',
-    title: 'Boom Highlights',
-    category: 'event',
-    videoPlatform: 'instagram',
-    videoId: 'C3vVA2rC8n_',
-    src: '',
-    thumbnail: 'https://images.unsplash.com/photo-1496024840928-4c41702d51f7?w=800&h=600&fit=crop',
-    description: 'Capturing the best moments.',
-  },
-  {
-    id: '1',
-    type: 'image',
-    title: 'Grand Sky Display',
-    category: 'event',
-    src: 'https://images.unsplash.com/photo-1518617330791-e5e2b7f1ee3b?w=800&h=600&fit=crop',
-    description: 'A spectacular sky show from one of our major events.',
-  },
-  {
-    id: '4',
-    type: 'image',
-    title: 'Premium Multi-Shot',
-    category: 'product',
-    src: 'https://images.unsplash.com/photo-1531697897236-8a8d5b6bae38?w=800&h=600&fit=crop',
-    description: 'Our high-end multi-shot aerial displays in action.',
-  },
-];
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
@@ -271,51 +175,8 @@ export default function Gallery() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
-  const [items, setItems] = useState<GalleryItem[]>(GALLERY_ITEMS);
-  const [loading, setLoading] = useState(true);
+  const items = GALLERY_ITEMS;
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [mediaData, eventData] = await Promise.all([
-          fetchMedia(),
-          fetchEvents()
-        ]);
-        
-        const apiItems: GalleryItem[] = [
-          ...mediaData.map((m: any) => ({
-            id: m.id.toString(),
-            type: m.type as 'image' | 'video',
-            title: m.caption || m.category || 'Celebration',
-            category: (m.category?.toLowerCase().replace(' ', '-') || 'event') as any,
-            src: m.url,
-            thumbnail: (m.type === 'video' && m.url.includes('instagram')) ? `https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800` : m.url,
-            videoId: m.type === 'video' ? m.url.split('/').pop() : undefined,
-            videoPlatform: m.type === 'video' ? (m.url.includes('instagram') ? 'instagram' as const : 'youtube' as const) : undefined,
-            description: m.caption
-          })),
-          ...eventData.map((e: any) => ({
-            id: 'e' + e.id,
-            type: 'image' as const,
-            title: e.name,
-            category: 'event' as const,
-            src: e.image,
-            description: e.description || `${e.location} - ${new Date(e.date).toLocaleDateString()}`
-          }))
-
-        ];
-        
-        if (apiItems.length > 0) {
-          setItems(apiItems);
-        }
-      } catch (err) {
-        console.error('Failed to load gallery', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
 
   const filtered =
     selectedCategory === 'all'

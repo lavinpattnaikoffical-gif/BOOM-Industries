@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Phone, User, Package, Loader2, CheckCircle, MessageSquare, ShoppingBag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { submitInquiry } from '@/api/admin';
+import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 
 // WhatsApp business number (update with your number)
@@ -60,29 +61,28 @@ export default function ProductInquiryModal({ isOpen, onClose }: ProductInquiryM
     if (form.quantity) message += `*Quantity:* ${form.quantity}\n`;
     if (form.notes) message += `*Notes:* ${form.notes}`;
 
-    // Save to database
-    try {
-      await (submitInquiry as any)({
-        name: form.name,
-        phone: form.phone,
-        email: form.email,
-        type: 'Bulk',
-        requirement: 'Product Custom Quote',
-        message: `Requirements: ${form.requirements}. Quantity: ${form.quantity}. Notes: ${form.notes}`
-      });
-    } catch (err) {
+    // 1. Forward inquiry via Gmail / Email client
+    sendInquiryViaEmail({
+      name: form.name,
+      phone: form.phone,
+      email: form.email,
+      requirement: 'Custom Product Order (Bulk/Wholesale)',
+      message: `Requirements: ${form.requirements}\nQuantity: ${form.quantity || 'Not specified'}\nAdditional Notes: ${form.notes || 'None'}`
+    });
 
-      console.error('Failed to save inquiry to DB', err);
-    }
-
-    // Open WhatsApp (Removed redirect logic)
-    // const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    // window.open(whatsappUrl, '_blank');
-
+    // 2. Also send to serverless API in background if online
+    submitInquiry({
+      name: form.name,
+      phone: form.phone,
+      email: form.email,
+      type: 'Bulk',
+      requirement: 'Custom Product Order',
+      message: `Requirements: ${form.requirements}. Quantity: ${form.quantity}. Notes: ${form.notes}`
+    } as any).catch(err => console.log('API notification logged:', err));
 
     toast({
-      title: '🎆 Submit Successful!',
-      description: 'Your inquiry has been logged. We will contact you soon.',
+      title: '✉️ Gmail Opened with Custom Order!',
+      description: 'Your inquiry has been prepared in your email. Simply click Send!',
     });
 
     setForm({ name: '', phone: '', email: '', requirements: '', quantity: '', notes: '' });

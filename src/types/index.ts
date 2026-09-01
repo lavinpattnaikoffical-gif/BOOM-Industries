@@ -25,16 +25,7 @@ export interface InquirySubmissionResponse {
   timestamp: string;
 }
 
-// Admin User Type
-export interface AdminUser {
-  id: string;
-  username: string;
-  name: string;
-  role: 'super' | 'regular';
-  createdAt: string;
-}
-
-// Product Type (extended for CRUD)
+// Product Type
 export interface Product {
   id: string;
   name: string;
@@ -44,10 +35,9 @@ export interface Product {
   rating?: string;
   description?: string;
   inStock?: boolean;
-  createdAt?: string;
 }
 
-// Event Type (extended for CRUD)
+// Event Type
 export interface EventItem {
   id: string;
   name: string;
@@ -56,23 +46,4 @@ export interface EventItem {
   location?: string;
   image?: string;
   status: 'upcoming' | 'completed' | 'cancelled';
-  createdAt?: string;
-}
-
-// Inquiry Status
-export type InquiryStatus = 'new' | 'in-progress' | 'resolved' | 'closed';
-
-// Admin Lead Type
-export interface Lead {
-  id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  city?: string;
-  requirement: string;
-  items: InquiryItem[];
-  message?: string;
-  createdAt: string;
-  status: InquiryStatus;
-  notes?: string;
 }

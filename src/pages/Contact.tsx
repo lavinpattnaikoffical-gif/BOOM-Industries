@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import SparkCursor from '@/components/SparkCursor';
 import EmberParticles from '@/components/EmberParticles';
 import { submitInquiry } from '@/api/admin';
+import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 // WhatsApp business number (update with your number)
 const WHATSAPP_NUMBER = '919876543210';
@@ -31,23 +32,27 @@ export default function Contact() {
     message += `*Phone:* ${form.phone}\n`;
     if (form.message) message += `*Message:* ${form.message}`;
 
-    // Save to database
-    try {
-      await submitInquiry({
-        name: form.name,
-        phone: form.phone,
-        requirement: 'Contact Form Inquiry',
-        message: form.message,
-        items: []
-      } as any);
-    } catch (err) {
-      console.error('Failed to submit contact form to DB', err);
-      toast({ title: 'Error', description: 'Failed to send message. Please try calling us.', variant: 'destructive' });
-      setLoading(false);
-      return;
-    }
+    // 1. Open Gmail / Mail with contact message
+    sendInquiryViaEmail({
+      name: form.name,
+      phone: form.phone,
+      requirement: 'Website Contact Form Message',
+      message: form.message
+    });
 
-    toast({ title: 'Message Sent!', description: 'We have received your message and will contact you soon.' });
+    // 2. Also send to serverless API in background if online
+    submitInquiry({
+      name: form.name,
+      phone: form.phone,
+      requirement: 'Contact Form Inquiry',
+      message: form.message,
+      items: []
+    } as any).catch(err => console.log('API notification logged:', err));
+
+    toast({
+      title: '✉️ Gmail Opened with Your Message!',
+      description: 'Your message has been prefilled in your email. Simply click Send!',
+    });
     
     setForm({ name: '', phone: '', message: '' });
     setLoading(false);

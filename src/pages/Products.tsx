@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Plus, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,11 +15,9 @@ import productRockets from '@/assets/product-rockets.jpg';
 import productFountains from '@/assets/product-fountains.jpg';
 import productCrackers from '@/assets/product-crackers.jpg';
 
-import { fetchProducts } from '@/api/admin';
 import { Product } from '@/types';
-
-// NOTE: Products are now loaded from the backend API.
-// Static placeholder array and fixed categories have been removed.
+import { useProducts } from '@/contexts/ProductContext';
+import { formatGoogleDriveUrl } from '@/utils/imageHelper';
 
 
 
@@ -97,7 +95,7 @@ const ProductCard = ({ product, onAddToInquiry, isHovered, setIsHovered }: Produ
         {/* Image Container */}
         <div className="relative overflow-hidden h-64 bg-night-surface">
           <img
-            src={product.image}
+            src={formatGoogleDriveUrl(product.image)}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
@@ -162,24 +160,8 @@ export default function Products() {
   const [selectedPriceRange, setSelectedPriceRange] = useState('All Prices');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('featured');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { products } = useProducts();
 
-  // Load products from backend
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (e) {
-        console.error('Failed to fetch products', e);
-        toast({ title: 'Error', description: 'Could not load products', variant: 'destructive' });
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
 
   // Filter products
   const filtered = products.filter((p) => {

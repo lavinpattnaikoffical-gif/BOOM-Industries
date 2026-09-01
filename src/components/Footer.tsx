@@ -90,7 +90,7 @@ export default function Footer() {
               <li><a href="/what-we-offer" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">What We Offer</a></li>
               <li><a href="/gallery" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Events</a></li>
               <li><a href="/contact" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
-              <li><a href="/admin" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors">Admin Login</a></li>
+              <li><a href="/edit_page" className="text-sm font-body text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">Product Manager (Edit)</a></li>
             </ul>
           </div>
 

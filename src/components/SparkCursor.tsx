@@ -21,11 +21,18 @@ export default function SparkCursor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    // Disable on touch devices to conserve resources
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
     let sparks: Spark[] = [];
-    let mouseX = 0, mouseY = 0;
+    let isRunning = false;
     let animId: number;
 
     const resize = () => {
@@ -33,26 +40,15 @@ export default function SparkCursor() {
       canvas.height = window.innerHeight;
     };
     resize();
-    window.addEventListener('resize', resize);
-
-    const onMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      for (let i = 0; i < 2; i++) {
-        sparks.push({
-          x: mouseX,
-          y: mouseY,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3 - 1,
-          life: 20 + Math.random() * 15,
-          maxLife: 35,
-          color: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)],
-        });
-      }
-    };
-    window.addEventListener('mousemove', onMove);
+    window.addEventListener('resize', resize, { passive: true });
 
     const loop = () => {
+      if (sparks.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isRunning = false;
+        return;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       sparks = sparks.filter((s) => {
         s.x += s.vx;
@@ -60,17 +56,45 @@ export default function SparkCursor() {
         s.vy += 0.08;
         s.vx *= 0.98;
         s.life--;
-        const alpha = s.life / s.maxLife;
-        const size = alpha * 2.5;
+        const alpha = Math.max(0, s.life / s.maxLife);
+        const size = alpha * 2.2;
         ctx.beginPath();
         ctx.arc(s.x, s.y, size, 0, Math.PI * 2);
         ctx.fillStyle = s.color + alpha + ')';
         ctx.fill();
         return s.life > 0;
       });
+
       animId = requestAnimationFrame(loop);
     };
-    animId = requestAnimationFrame(loop);
+
+    const onMove = (e: MouseEvent) => {
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+      for (let i = 0; i < 2; i++) {
+        sparks.push({
+          x: mouseX,
+          y: mouseY,
+          vx: (Math.random() - 0.5) * 2.8,
+          vy: (Math.random() - 0.5) * 2.8 - 0.8,
+          life: 18 + Math.random() * 14,
+          maxLife: 32,
+          color: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)],
+        });
+      }
+
+      // Limit max sparks pool
+      if (sparks.length > 50) {
+        sparks.splice(0, sparks.length - 50);
+      }
+
+      if (!isRunning) {
+        isRunning = true;
+        animId = requestAnimationFrame(loop);
+      }
+    };
+
+    window.addEventListener('mousemove', onMove, { passive: true });
 
     return () => {
       cancelAnimationFrame(animId);
