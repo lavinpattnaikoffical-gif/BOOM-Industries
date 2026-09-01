@@ -65,6 +65,12 @@ export default function Footer() {
                 <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#16a34a' }} />
                 <span className="group-hover:text-green-400 transition-colors">9920976669</span>
               </a>
+              <a href="mailto:Boomindustries26@gmail.com"
+                 className="flex items-center gap-2.5 text-sm font-body group"
+                 style={{ color: 'rgba(172,170,177,0.8)' }}>
+                <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#60a5fa' }} />
+                <span className="group-hover:text-blue-400 transition-colors">Boomindustries26@gmail.com</span>
+              </a>
               <div className="flex items-start gap-2.5 text-sm font-body"
                    style={{ color: 'rgba(172,170,177,0.8)' }}>
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: '#ef4444' }} />

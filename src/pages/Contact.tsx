@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Instagram, Send, MessageSquare, Clock } from 'lucide-react';
+import { MapPin, Phone, Instagram, Send, MessageSquare, Clock, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -149,6 +149,18 @@ export default function Contact() {
                   <div>
                     <h3 className="font-display font-bold text-lg">Contact Number</h3>
                     <p className="text-muted-foreground text-sm">9920976669</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <Mail className="text-blue-400 w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-lg">Email Us</h3>
+                    <a href="mailto:Boomindustries26@gmail.com" className="text-muted-foreground text-sm hover:text-primary transition-colors">
+                      Boomindustries26@gmail.com
+                    </a>
                   </div>
                 </div>
 

@@ -25,7 +25,7 @@ export default async function handler(req: Request) {
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL || 'delivered@resend.dev';
+    const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL || 'Boomindustries26@gmail.com';
 
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not configured');

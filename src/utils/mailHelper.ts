@@ -3,7 +3,7 @@
  */
 
 // Target business email address where inquiries will be directed
-export const BUSINESS_EMAIL = 'boomfireworks.inquiry@gmail.com';
+export const BUSINESS_EMAIL = 'Boomindustries26@gmail.com';
 
 interface MailInquiryData {
   name: string;
