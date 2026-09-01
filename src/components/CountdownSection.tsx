@@ -3,8 +3,10 @@ import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 function getNextDiwali(): Date {
   const now = new Date();
-  const diwali2026 = new Date(2026, 9, 19);
-  const diwali2027 = new Date(2027, 10, 8);
+  // Diwali 2026 (Lakshmi Puja): November 8, 2026 (0-indexed month 10)
+  const diwali2026 = new Date(2026, 10, 8, 0, 0, 0);
+  // Diwali 2027 (Lakshmi Puja): October 29, 2027 (0-indexed month 9)
+  const diwali2027 = new Date(2027, 9, 29, 0, 0, 0);
   return now < diwali2026 ? diwali2026 : diwali2027;
 }
 
@@ -101,24 +103,21 @@ export default function CountdownSection() {
 
       <div className="container mx-auto px-6 text-center relative z-10">
         <div className="reveal">
-          <span
-            className="text-xs font-body tracking-widest uppercase"
-            style={{ color: '#7eafff' }}
-          >
-            Mark Your Calendar
-          </span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-3">
+            <span>🎆 Diwali 2026 • 8 November 2026 (Sunday)</span>
+          </div>
           <h2
-            className="font-display font-bold mt-3 mb-3"
+            className="font-display font-bold mt-2 mb-3"
             style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: '#f1effd' }}
           >
-            Next Diwali{' '}
+            Diwali 2026{' '}
             <span className="glow-text-multi italic">Countdown</span>
           </h2>
           <p
-            className="font-body mb-12"
+            className="font-body mb-12 text-sm md:text-base max-w-xl mx-auto"
             style={{ color: 'rgba(171,170,183,0.85)' }}
           >
-            The festival of lights awaits. Prepare for a celebration like no other.
+            The grand festival of lights arrives on <strong>Sunday, 8 November 2026</strong>. Prepare for a brilliant celebration.
           </p>
         </div>
 
