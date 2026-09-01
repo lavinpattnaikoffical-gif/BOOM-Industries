@@ -165,29 +165,40 @@ export default function Products() {
 
   // Filter products
   const filtered = products.filter((p) => {
-    const categoryMatch = selectedCategory === 'All' || p.category === selectedCategory;
+    const categoryMatch = selectedCategory === 'All' || p.category?.toLowerCase() === selectedCategory.toLowerCase();
+    
+    // Safely parse numeric price
+    const rawPriceNum = parseFloat((p.price || '').toString().replace(/[^0-9.]/g, ''));
+    const price = isNaN(rawPriceNum) ? 0 : rawPriceNum;
+    
     const priceRange = PRICE_RANGES.find((r) => r.label === selectedPriceRange);
-    const price = parseFloat(p.price.replace(/[^0-9.-]+/g, ''));
-    const priceMatch = price >= (priceRange?.min ?? 0) && price <= (priceRange?.max ?? Infinity);
-    const searchMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const priceMatch = 
+      selectedPriceRange === 'All Prices' || 
+      (price >= (priceRange?.min ?? 0) && price <= (priceRange?.max ?? Infinity));
+
+    const searchMatch = !searchTerm || (p.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     return categoryMatch && priceMatch && searchMatch;
   });
 
-  // Sort products
+  // Sort products safely
   if (sortBy === 'price-low') {
     filtered.sort((a, b) => {
-      const priceA = parseFloat(a.price.replace(/[^0-9.-]+/g, ''));
-      const priceB = parseFloat(b.price.replace(/[^0-9.-]+/g, ''));
+      const priceA = parseFloat((a.price || '').toString().replace(/[^0-9.]/g, '')) || 0;
+      const priceB = parseFloat((b.price || '').toString().replace(/[^0-9.]/g, '')) || 0;
       return priceA - priceB;
     });
   } else if (sortBy === 'price-high') {
     filtered.sort((a, b) => {
-      const priceA = parseFloat(a.price.replace(/[^0-9.-]+/g, ''));
-      const priceB = parseFloat(b.price.replace(/[^0-9.-]+/g, ''));
+      const priceA = parseFloat((a.price || '').toString().replace(/[^0-9.]/g, '')) || 0;
+      const priceB = parseFloat((b.price || '').toString().replace(/[^0-9.]/g, '')) || 0;
       return priceB - priceA;
     });
   } else if (sortBy === 'rating') {
-    filtered.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+    filtered.sort((a, b) => {
+      const ratingA = parseFloat(a.rating || '4.5') || 0;
+      const ratingB = parseFloat(b.rating || '4.5') || 0;
+      return ratingB - ratingA;
+    });
   }
 
   const handleAddToInquiry = (product: Product) => {
@@ -368,8 +379,9 @@ export default function Products() {
                   onClick={() => {
                     setSelectedCategory('All');
                     setSelectedPriceRange('All Prices');
+                    setSearchTerm('');
                   }}
-                  className="mt-6 px-6 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all"
+                  className="mt-6 px-6 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all font-semibold"
                 >
                   Clear Filters
                 </button>
