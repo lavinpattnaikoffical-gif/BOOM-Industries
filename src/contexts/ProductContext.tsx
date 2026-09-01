@@ -19,9 +19,9 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [products, setProducts] = useState<Product[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
+      if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
@@ -61,7 +61,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const resetToDefaults = useCallback(() => {
     setProducts(DEFAULT_PRODUCTS);
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
+    } catch (e) {
+      console.error('Error resetting products:', e);
+    }
   }, []);
 
   const exportProductsAsCode = useCallback(() => {

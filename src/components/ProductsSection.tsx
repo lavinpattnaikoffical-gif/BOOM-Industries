@@ -61,78 +61,86 @@ export default function ProductsSection() {
           </p>
         </div>
 
-        {/* Featured Highlights Grid (Only 3 top items) */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children mb-12">
-          {featuredProducts.map((p, i) => (
-            <div
-              key={p.id || i}
-              className="reveal boom-card rounded-2xl overflow-hidden cursor-pointer flex flex-col justify-between"
-              style={{
-                border: `1px solid ${getGlowColor(p.category)}20`,
-                transition: 'border-color 0.35s, box-shadow 0.35s, transform 0.35s',
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLElement;
-                const color = getGlowColor(p.category);
-                el.style.borderColor = `${color}60`;
-                el.style.boxShadow = `0 0 32px ${color}25, 0 12px 40px rgba(0,0,0,0.4)`;
-                el.style.transform = 'translateY(-6px)';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLElement;
-                const color = getGlowColor(p.category);
-                el.style.borderColor = `${color}20`;
-                el.style.boxShadow = '';
-                el.style.transform = 'translateY(0)';
-              }}
-            >
-              <div className="relative overflow-hidden h-56 bg-night-surface">
-                <img 
-                  src={formatGoogleDriveUrl(p.image)} 
-                  alt={p.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
-                />
-                <div className="absolute inset-0"
-                     style={{ background: 'linear-gradient(to top, rgba(14,14,19,0.9) 0%, transparent 50%)' }} />
-                
-                <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-display font-bold uppercase tracking-wider"
-                     style={{ background: 'rgba(14,14,19,0.85)', backdropFilter: 'blur(8px)', border: `1px solid ${getGlowColor(p.category)}40`, color: getGlowColor(p.category) }}>
-                  {p.category}
+        {/* Featured Highlights Grid */}
+        {featuredProducts.length > 0 ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children mb-12">
+            {featuredProducts.map((p, i) => (
+              <div
+                key={p.id || i}
+                className="reveal boom-card rounded-2xl overflow-hidden cursor-pointer flex flex-col justify-between"
+                style={{
+                  border: `1px solid ${getGlowColor(p.category)}20`,
+                  transition: 'border-color 0.35s, box-shadow 0.35s, transform 0.35s',
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  const color = getGlowColor(p.category);
+                  el.style.borderColor = `${color}60`;
+                  el.style.boxShadow = `0 0 32px ${color}25, 0 12px 40px rgba(0,0,0,0.4)`;
+                  el.style.transform = 'translateY(-6px)';
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  const color = getGlowColor(p.category);
+                  el.style.borderColor = `${color}20`;
+                  el.style.boxShadow = '';
+                  el.style.transform = 'translateY(0)';
+                }}
+              >
+                <div className="relative overflow-hidden h-56 bg-night-surface">
+                  <img 
+                    src={formatGoogleDriveUrl(p.image)} 
+                    alt={p.name} 
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
+                  />
+                  <div className="absolute inset-0"
+                       style={{ background: 'linear-gradient(to top, rgba(14,14,19,0.9) 0%, transparent 50%)' }} />
+                  
+                  <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-display font-bold uppercase tracking-wider"
+                       style={{ background: 'rgba(14,14,19,0.85)', backdropFilter: 'blur(8px)', border: `1px solid ${getGlowColor(p.category)}40`, color: getGlowColor(p.category) }}>
+                    {p.category}
+                  </div>
+
+                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-display font-bold flex items-center gap-1"
+                       style={{ background: 'rgba(14,14,19,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(245,184,0,0.4)', color: '#f5b800' }}>
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> {p.rating || '4.8'}
+                  </div>
                 </div>
 
-                <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-display font-bold flex items-center gap-1"
-                     style={{ background: 'rgba(14,14,19,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(245,184,0,0.4)', color: '#f5b800' }}>
-                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /> {p.rating || '4.8'}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display font-bold text-lg mb-1.5 text-foreground">
+                      {p.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-4">
+                      {p.description || 'Premium quality handcrafted fireworks for dazzling moments.'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                    <span className="font-display font-extrabold text-2xl text-primary">{p.price}</span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleAddInquiry(p); }}
+                      className="px-4 py-2 rounded-xl text-xs font-display font-semibold transition-all duration-300 hover:scale-105"
+                      style={{ 
+                        background: `${getGlowColor(p.category)}18`, 
+                        border: `1px solid ${getGlowColor(p.category)}40`, 
+                        color: getGlowColor(p.category) 
+                      }}>
+                      + Add to Inquiry
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-display font-bold text-lg mb-1.5 text-foreground">
-                    {p.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-4">
-                    {p.description || 'Premium quality handcrafted fireworks for dazzling moments.'}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                  <span className="font-display font-extrabold text-2xl text-primary">{p.price}</span>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleAddInquiry(p); }}
-                    className="px-4 py-2 rounded-xl text-xs font-display font-semibold transition-all duration-300 hover:scale-105"
-                    style={{ 
-                      background: `${getGlowColor(p.category)}18`, 
-                      border: `1px solid ${getGlowColor(p.category)}40`, 
-                      color: getGlowColor(p.category) 
-                    }}>
-                    + Add to Inquiry
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="glass-card p-8 rounded-2xl text-center border border-white/5 mb-12">
+            <p className="text-muted-foreground text-sm">
+              Featured fireworks will appear here once added in the Product Manager.
+            </p>
+          </div>
+        )}
 
         {/* CTA to Full Store */}
         <div className="text-center reveal">
