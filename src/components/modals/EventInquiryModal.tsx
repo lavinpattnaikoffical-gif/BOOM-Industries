@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Phone, User, Calendar, MapPin, Loader2, MessageSquare, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { submitInquiry } from '@/api/admin';
 import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 
@@ -64,7 +63,7 @@ export default function EventInquiryModal({ isOpen, onClose }: EventInquiryModal
     if (form.budget) message += `*Budget:* ${form.budget}\n`;
     if (form.requirements) message += `*Requirements:* ${form.requirements}`;
 
-    // 1. Forward inquiry via Gmail / Email client
+    // Forward inquiry via Gmail / Email client
     sendInquiryViaEmail({
       name: form.name,
       phone: form.phone,
@@ -76,17 +75,6 @@ export default function EventInquiryModal({ isOpen, onClose }: EventInquiryModal
       requirement: `Event Planning (${form.eventType})`,
       message: form.requirements
     });
-
-    // 2. Also send to serverless API in background if online
-    submitInquiry({
-      name: form.name,
-      phone: form.phone,
-      email: form.email,
-      type: 'Event',
-      requirement: 'Event Planning Inquiry',
-      city: form.location,
-      message: `Type: ${form.eventType}. Date: ${form.eventDate}. Budget: ${form.budget}. Requirements: ${form.requirements}`
-    } as any).catch(err => console.log('API notification logged:', err));
 
     toast({
       title: '✉️ Gmail Opened with Event Inquiry!',

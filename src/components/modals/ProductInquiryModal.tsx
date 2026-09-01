@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Phone, User, Package, Loader2, CheckCircle, MessageSquare, ShoppingBag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { submitInquiry } from '@/api/admin';
 import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 
@@ -61,7 +60,7 @@ export default function ProductInquiryModal({ isOpen, onClose }: ProductInquiryM
     if (form.quantity) message += `*Quantity:* ${form.quantity}\n`;
     if (form.notes) message += `*Notes:* ${form.notes}`;
 
-    // 1. Forward inquiry via Gmail / Email client
+    // Forward inquiry via Gmail / Email client
     sendInquiryViaEmail({
       name: form.name,
       phone: form.phone,
@@ -69,16 +68,6 @@ export default function ProductInquiryModal({ isOpen, onClose }: ProductInquiryM
       requirement: 'Custom Product Order (Bulk/Wholesale)',
       message: `Requirements: ${form.requirements}\nQuantity: ${form.quantity || 'Not specified'}\nAdditional Notes: ${form.notes || 'None'}`
     });
-
-    // 2. Also send to serverless API in background if online
-    submitInquiry({
-      name: form.name,
-      phone: form.phone,
-      email: form.email,
-      type: 'Bulk',
-      requirement: 'Custom Product Order',
-      message: `Requirements: ${form.requirements}. Quantity: ${form.quantity}. Notes: ${form.notes}`
-    } as any).catch(err => console.log('API notification logged:', err));
 
     toast({
       title: '✉️ Gmail Opened with Custom Order!',

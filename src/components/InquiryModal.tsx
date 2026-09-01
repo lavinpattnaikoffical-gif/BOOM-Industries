@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { X, Phone, User, MapPin, Package, Loader2, MessageSquare, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useInquiryCart } from '@/contexts/InquiryContext';
-import { submitInquiry } from '@/api/admin';
 import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 // WhatsApp business number (update with your number)
@@ -79,7 +78,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       waMessage += `\n`;
     }
 
-    // 1. Forward inquiry via Gmail / Email client
+    // Forward inquiry via Gmail / Email client
     sendInquiryViaEmail({
       name: form.name,
       phone: form.phone,
@@ -88,16 +87,6 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       items: items,
       message: items.length > 0 ? `Selected Cart: ${items.map(i => `${i.productName} (${i.quantity})`).join(', ')}` : 'Product Quote Request'
     });
-
-    // 2. Also send to serverless API in background if online
-    submitInquiry({
-      name: form.name,
-      phone: form.phone,
-      city: form.city,
-      requirement: reqLabel,
-      items: items,
-      message: items.length > 0 ? `Cart: ${items.map(i => i.productName).join(', ')}` : 'Inquiry'
-    } as any).catch(err => console.log('API notification logged:', err));
 
     toast({
       title: '✉️ Gmail Opened with Inquiry!',

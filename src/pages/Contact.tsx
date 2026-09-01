@@ -6,7 +6,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SparkCursor from '@/components/SparkCursor';
 import EmberParticles from '@/components/EmberParticles';
-import { submitInquiry } from '@/api/admin';
 import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
 // WhatsApp business number (update with your number)
@@ -32,22 +31,13 @@ export default function Contact() {
     message += `*Phone:* ${form.phone}\n`;
     if (form.message) message += `*Message:* ${form.message}`;
 
-    // 1. Open Gmail / Mail with contact message
+    // Open Gmail / Mail with contact message
     sendInquiryViaEmail({
       name: form.name,
       phone: form.phone,
       requirement: 'Website Contact Form Message',
       message: form.message
     });
-
-    // 2. Also send to serverless API in background if online
-    submitInquiry({
-      name: form.name,
-      phone: form.phone,
-      requirement: 'Contact Form Inquiry',
-      message: form.message,
-      items: []
-    } as any).catch(err => console.log('API notification logged:', err));
 
     toast({
       title: '✉️ Gmail Opened with Your Message!',
