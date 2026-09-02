@@ -1,17 +1,48 @@
 import { useState, useEffect, useRef } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
-function getNextDiwali(): Date {
-  const now = new Date();
-  // Diwali 2026 (Lakshmi Puja): November 8, 2026 (0-indexed month 10)
-  const diwali2026 = new Date(2026, 10, 8, 0, 0, 0);
-  // Diwali 2027 (Lakshmi Puja): October 29, 2027 (0-indexed month 9)
-  const diwali2027 = new Date(2027, 9, 29, 0, 0, 0);
-  return now < diwali2026 ? diwali2026 : diwali2027;
+interface DiwaliEvent {
+  year: number;
+  date: Date;
+  dateString: string;
+  dayString: string;
 }
 
-function getTimeLeft(target: Date) {
-  const diff = target.getTime() - Date.now();
+const DIWALI_SCHEDULE: DiwaliEvent[] = [
+  {
+    year: 2025,
+    date: new Date('2025-10-20T00:00:00'),
+    dateString: '20 October 2025',
+    dayString: 'Monday',
+  },
+  {
+    year: 2026,
+    date: new Date('2026-11-08T00:00:00'),
+    dateString: '8 November 2026',
+    dayString: 'Sunday',
+  },
+  {
+    year: 2027,
+    date: new Date('2027-10-29T00:00:00'),
+    dateString: '29 October 2027',
+    dayString: 'Friday',
+  },
+  {
+    year: 2028,
+    date: new Date('2028-10-17T00:00:00'),
+    dateString: '17 October 2028',
+    dayString: 'Tuesday',
+  },
+];
+
+function getUpcomingDiwali(): DiwaliEvent {
+  const now = new Date();
+  const upcoming = DIWALI_SCHEDULE.find((d) => d.date.getTime() > now.getTime());
+  return upcoming || DIWALI_SCHEDULE[DIWALI_SCHEDULE.length - 1];
+}
+
+function getTimeLeft(targetDate: Date) {
+  const diff = targetDate.getTime() - Date.now();
   if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   return {
     days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -67,13 +98,13 @@ function CountdownBlock({ value, label, color }: { value: number; label: string;
 
 export default function CountdownSection() {
   const ref = useScrollReveal();
-  const [target] = useState(getNextDiwali);
-  const [time, setTime] = useState(getTimeLeft(target));
+  const [diwaliInfo] = useState<DiwaliEvent>(getUpcomingDiwali);
+  const [time, setTime] = useState(getTimeLeft(diwaliInfo.date));
 
   useEffect(() => {
-    const id = setInterval(() => setTime(getTimeLeft(target)), 1000);
+    const id = setInterval(() => setTime(getTimeLeft(diwaliInfo.date)), 1000);
     return () => clearInterval(id);
-  }, [target]);
+  }, [diwaliInfo]);
 
   const units = [
     { label: 'Days',    value: time.days },
@@ -103,20 +134,20 @@ export default function CountdownSection() {
       <div className="container mx-auto px-6 text-center relative z-10">
         <div className="reveal">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-3">
-            <span>🎆 Diwali 2026 • 8 November 2026 (Sunday)</span>
+            <span>🎆 Diwali {diwaliInfo.year} • {diwaliInfo.dateString} ({diwaliInfo.dayString})</span>
           </div>
           <h2
             className="font-display font-bold mt-2 mb-3"
             style={{ fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: '#f1effd' }}
           >
-            Diwali 2026{' '}
+            Diwali {diwaliInfo.year}{' '}
             <span className="glow-text-multi italic">Countdown</span>
           </h2>
           <p
             className="font-body mb-12 text-sm md:text-base max-w-xl mx-auto"
             style={{ color: 'rgba(171,170,183,0.85)' }}
           >
-            The grand festival of lights arrives on <strong>Sunday, 8 November 2026</strong>. Prepare for a brilliant celebration.
+            The grand festival of lights arrives on <strong>{diwaliInfo.dayString}, {diwaliInfo.dateString}</strong>. Prepare for a brilliant celebration.
           </p>
         </div>
 
