@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Instagram, Send, MessageSquare, Clock, Mail } from 'lucide-react';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -142,6 +143,33 @@ export default function Contact() {
                   </div>
                 </div>
 
+                {/* WhatsApp */}
+                <div className="flex items-start gap-4">
+                  <a
+                    href="https://wa.me/919920976669?text=Hello!%20I%20want%20to%20inquire%20about%20fireworks."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-white shadow-lg transition-transform hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                      boxShadow: '0 4px 15px rgba(37, 211, 102, 0.35)',
+                    }}
+                  >
+                    <WhatsAppIcon className="w-6 h-6" />
+                  </a>
+                  <div>
+                    <h3 className="font-display font-bold text-lg">WhatsApp Chat</h3>
+                    <a
+                      href="https://wa.me/919920976669?text=Hello!%20I%20want%20to%20inquire%20about%20fireworks."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-green-400 text-sm font-semibold hover:underline"
+                    >
+                      +91 9920976669 (Click to Chat)
+                    </a>
+                  </div>
+                </div>
+
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
                     <Mail className="text-blue-400 w-6 h-6" />
@@ -154,15 +182,37 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
-                    <Instagram className="text-red-500 w-6 h-6" />
+                {/* Big Noticeable Instagram Card */}
+                <a
+                  href="https://instagram.com/boom_fireworks_official"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.02] group block"
+                  style={{
+                    background: 'linear-gradient(45deg, rgba(240,148,51,0.12) 0%, rgba(230,104,60,0.12) 25%, rgba(220,39,67,0.12) 50%, rgba(204,35,102,0.12) 75%, rgba(188,24,136,0.12) 100%)',
+                    borderColor: 'rgba(220,39,67,0.3)',
+                    boxShadow: '0 4px 20px rgba(220,39,67,0.15)',
+                  }}
+                >
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0 group-hover:scale-110 transition-transform"
+                    style={{
+                      background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                      boxShadow: '0 4px 15px rgba(220, 39, 67, 0.4)',
+                    }}
+                  >
+                    <Instagram className="w-8 h-8 stroke-[2.2]" />
                   </div>
-                  <div>
-                    <h3 className="font-display font-bold text-lg">Instagram</h3>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-display font-bold text-lg text-foreground group-hover:text-red-400 transition-colors">Instagram</h3>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                        Follow Us
+                      </span>
+                    </div>
                     <p className="text-muted-foreground text-sm">@boom_fireworks_official</p>
                   </div>
-                </div>
+                </a>
 
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center flex-shrink-0">

@@ -41,11 +41,18 @@ export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
       <div className="relative z-10 text-center px-5 max-w-5xl mx-auto">
 
         {/* Brand tagline badge */}
-        <div className="mb-8">
-          <span className="boom-pill">
-            <span className="w-1.5 h-1.5 rounded-full mt-0.5" style={{ background: '#f5b800', animation: 'pulse-glow 2s ease-in-out infinite' }} />
-            India's Finest Fireworks — Since Decades
-          </span>
+        <div className="mb-8 flex items-center justify-center">
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-primary/30 bg-night-base/80 backdrop-blur-md shadow-lg shadow-primary/10 hover:border-primary/60 transition-colors">
+            <img
+              src="/logo.jpg"
+              alt="BOOM"
+              className="w-6 h-6 rounded-full object-cover ring-1 ring-primary/50"
+            />
+            <span className="text-xs sm:text-sm font-display font-medium tracking-wide text-foreground/90 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              India's Finest Fireworks — Since Decades
+            </span>
+          </div>
         </div>
 
         {/* Main Headline */}
@@ -77,9 +84,9 @@ export default function HeroSection({ onInquiryClick }: HeroSectionProps) {
           className="font-body text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
           style={{ color: 'rgba(172,170,177,0.95)' }}
         >
-          Lighting up your celebrations since decades.
+          Lighting up your celebrations for decades.
           <br className="hidden sm:block" />
-          India's premier fireworks manufacturers, wholesalers & retailers.
+          India's Premium Fireworks Manufacturers, Wholesalers & Retailers.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10 w-full sm:w-auto px-4 sm:px-0">

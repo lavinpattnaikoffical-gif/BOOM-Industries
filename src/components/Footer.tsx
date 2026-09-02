@@ -1,4 +1,5 @@
 import { MapPin, Phone, Mail, Instagram } from 'lucide-react';
+import WhatsAppIcon from './WhatsAppIcon';
 
 const quickLinks = [
   { label: 'Home', href: '/' },
@@ -38,15 +39,24 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             {/* Logo */}
-            <div className="boom-logo-text text-3xl leading-none tracking-tight mb-2">
-              <span className="boom-B">B</span>
-              <span className="boom-O1">O</span>
-              <span className="boom-O2">O</span>
-              <span className="boom-M">M</span>
+            <div className="flex items-center gap-3 mb-3">
+              <img
+                src="/logo.jpg"
+                alt="BOOM Industries Logo"
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/40 shadow-lg shadow-primary/20"
+              />
+              <div>
+                <div className="boom-logo-text text-2xl sm:text-3xl leading-none tracking-tight">
+                  <span className="boom-B">B</span>
+                  <span className="boom-O1">O</span>
+                  <span className="boom-O2">O</span>
+                  <span className="boom-M">M</span>
+                </div>
+                <p className="text-xs font-display font-semibold tracking-[0.18em] uppercase" style={{ color: 'rgba(249,245,253,0.7)' }}>
+                  Industries
+                </p>
+              </div>
             </div>
-            <p className="text-sm font-display font-semibold mb-1" style={{ color: 'rgba(249,245,253,0.6)' }}>
-              Industries
-            </p>
             <p className="text-xs font-body italic mb-5" style={{ color: 'rgba(172,170,177,0.6)' }}>
               "Here Comes The Boom 🎆"
             </p>
@@ -77,10 +87,21 @@ export default function Footer() {
                 <span>In front of Rajmata School, Sale Galli, Gunjgolai, Latur – 413 512</span>
               </div>
               <a href="https://instagram.com/boom_fireworks_official" target="_blank" rel="noopener noreferrer"
-                 className="flex items-center gap-2.5 text-sm font-body group"
-                 style={{ color: 'rgba(172,170,177,0.8)' }}>
-                <Instagram className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#f87171' }} />
-                <span className="group-hover:text-red-400 transition-colors">@boom_fireworks_official</span>
+                 className="flex items-center gap-3 p-2.5 rounded-xl group transition-all duration-300 hover:scale-105"
+                 style={{ 
+                   background: 'linear-gradient(45deg, rgba(240,148,51,0.15) 0%, rgba(230,104,60,0.15) 25%, rgba(220,39,67,0.15) 50%, rgba(204,35,102,0.15) 75%, rgba(188,24,136,0.15) 100%)',
+                   border: '1px solid rgba(220,39,67,0.3)'
+                 }}>
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0"
+                  style={{ background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' }}
+                >
+                  <Instagram className="w-5 h-5 stroke-[2.2]" />
+                </div>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-xs font-display font-bold text-foreground group-hover:text-red-400 transition-colors">Follow on Instagram</span>
+                  <span className="text-[11px] text-muted-foreground">@boom_fireworks_official</span>
+                </div>
               </a>
             </div>
           </div>
@@ -136,17 +157,17 @@ export default function Footer() {
               </p>
               <a
                 href="tel:9922097669"
-                className="block w-full text-center btn-boom-primary mb-3 text-sm"
+                className="block w-full text-center btn-boom-primary mb-3 text-sm font-bold flex items-center justify-center gap-2"
               >
-                📞 Call: 9922097669
+                <Phone className="w-4 h-4" /> Call: 9922097669
               </a>
               <a
-                href="https://wa.me/919922097669?text=Hello! I want to inquire about fireworks."
+                href="https://wa.me/919922097669?text=Hello!%20I%20want%20to%20inquire%20about%20fireworks."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center btn-boom-green text-sm"
+                className="block w-full text-center btn-boom-green text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
               >
-                💬 WhatsApp Us
+                <WhatsAppIcon className="w-5 h-5 text-white" /> WhatsApp Us
               </a>
             </div>
             <p className="text-xs font-body text-center" style={{ color: 'rgba(172,170,177,0.5)' }}>

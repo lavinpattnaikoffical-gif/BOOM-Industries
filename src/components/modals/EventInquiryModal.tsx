@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Phone, User, Calendar, MapPin, Loader2, MessageSquare, Sparkles } from 'lucide-react';
+import { X, Phone, User, Calendar, MapPin, Loader2, Sparkles } from 'lucide-react';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
 import { useToast } from '@/hooks/use-toast';
 import { sendInquiryViaEmail } from '@/utils/mailHelper';
 
@@ -167,7 +168,7 @@ export default function EventInquiryModal({ isOpen, onClose }: EventInquiryModal
             </div>
 
             <button type="submit" disabled={submitting} className="w-full btn-boom-primary py-3.5 mt-2 flex items-center justify-center gap-2">
-              {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : <><MessageSquare className="w-5 h-5" /> Submit Event Inquiry</>}
+              {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : <><WhatsAppIcon className="w-5 h-5" /> Submit Event Inquiry via WhatsApp</>}
             </button>
           </form>
         </div>

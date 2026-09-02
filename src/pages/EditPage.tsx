@@ -37,6 +37,7 @@ import { Product } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { formatGoogleDriveUrl, isGoogleDriveUrl } from '@/utils/imageHelper';
 import { publishProductsToGitHub, getStoredGitHubToken } from '@/utils/githubSync';
+import { getCategoryMeta, KNOWN_CATEGORY_METADATA } from '@/utils/categoryHelper';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SparkCursor from '@/components/SparkCursor';
@@ -92,6 +93,12 @@ export default function EditPage() {
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Category Manager Modal state
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [renamedCategoryName, setRenamedCategoryName] = useState('');
 
   // Modal / Form state for Add/Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -261,6 +268,79 @@ export default function EditPage() {
     }
 
     setIsModalOpen(false);
+  };
+
+  // Category Management Handlers
+  const handleCreateCategory = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name) return;
+    if (categoriesList.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      toast({
+        title: 'Category Exists',
+        description: `"${name}" category already exists.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    // Pre-select new custom category and open add product modal
+    setFormName('');
+    setFormPrice('');
+    setFormRating('4.8');
+    setFormDescription('');
+    setFormImage('');
+    setEditingProduct(null);
+    setFormCategory('Custom');
+    setCustomCategory(name);
+    setNewCategoryName('');
+    setIsCategoryModalOpen(false);
+    setIsModalOpen(true);
+    toast({
+      title: 'Category Created!',
+      description: `Category "${name}" created. Add your first product under this category.`,
+    });
+  };
+
+  const handleRenameCategory = (oldCategory: string, newCategory: string) => {
+    const trimmedNew = newCategory.trim();
+    if (!trimmedNew || oldCategory.toLowerCase() === trimmedNew.toLowerCase()) {
+      setEditingCategory(null);
+      return;
+    }
+    let updatedCount = 0;
+    products.forEach((p) => {
+      if (p.category.toLowerCase() === oldCategory.toLowerCase()) {
+        updateProduct(p.id, { category: trimmedNew });
+        updatedCount++;
+      }
+    });
+    setEditingCategory(null);
+    setRenamedCategoryName('');
+    toast({
+      title: 'Category Renamed!',
+      description: `Updated ${updatedCount} products from "${oldCategory}" to "${trimmedNew}".`,
+    });
+  };
+
+  const handleDeleteCategory = (categoryToDelete: string) => {
+    const affectedProducts = products.filter(
+      (p) => p.category.toLowerCase() === categoryToDelete.toLowerCase()
+    );
+    if (affectedProducts.length === 0) return;
+
+    if (
+      window.confirm(
+        `Are you sure you want to delete category "${categoryToDelete}"? This will move its ${affectedProducts.length} products to "General".`
+      )
+    ) {
+      affectedProducts.forEach((p) => {
+        updateProduct(p.id, { category: 'General' });
+      });
+      toast({
+        title: 'Category Removed',
+        description: `Moved ${affectedProducts.length} items from "${categoryToDelete}" to "General".`,
+      });
+    }
   };
 
   // Delete product with confirmation
@@ -503,6 +583,15 @@ export default function EditPage() {
               </button>
 
               <button
+                onClick={() => setIsCategoryModalOpen(true)}
+                className="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-display font-semibold bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary flex items-center justify-center gap-1.5 transition-all"
+                title="Manage product categories"
+              >
+                <Tag className="w-3.5 h-3.5" />
+                Manage Categories
+              </button>
+
+              <button
                 onClick={() => setIsCodeModalOpen(true)}
                 className="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-display font-semibold bg-white/5 hover:bg-white/10 border border-white/15 text-foreground flex items-center justify-center gap-1.5 transition-all"
                 title="Export updated products as code"
@@ -548,13 +637,18 @@ export default function EditPage() {
               </div>
             </div>
 
-            <div className="glass-card p-3 sm:p-4 rounded-2xl border border-white/5 flex items-center gap-2.5 sm:gap-3.5">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0">
-                <Tag className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
-              <div>
-                <div className="text-xl sm:text-2xl font-bold font-display text-foreground">{categoriesList.length - 1}</div>
-                <div className="text-[11px] sm:text-xs text-muted-foreground">Categories</div>
+            <div 
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="glass-card p-3 sm:p-4 rounded-2xl border border-white/5 hover:border-amber-500/40 cursor-pointer flex items-center justify-between group transition-all"
+            >
+              <div className="flex items-center gap-2.5 sm:gap-3.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <Tag className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <div>
+                  <div className="text-xl sm:text-2xl font-bold font-display text-foreground">{categoriesList.length - 1}</div>
+                  <div className="text-[11px] sm:text-xs text-muted-foreground group-hover:text-amber-400 transition-colors">Categories (Edit)</div>
+                </div>
               </div>
             </div>
 
@@ -603,21 +697,36 @@ export default function EditPage() {
               )}
             </div>
 
-            {/* Category Filter Pills */}
+            {/* Category Filter Pills + Manage Button */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full no-scrollbar">
-              {categoriesList.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-display font-medium whitespace-nowrap transition-all ${
-                    selectedCategory === cat
-                      ? 'bg-primary text-night-deep font-bold shadow-md shadow-primary/30'
-                      : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground border border-white/5'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+              {categoriesList.map((cat) => {
+                const count = cat === 'All' ? products.length : products.filter(p => p.category.toLowerCase() === cat.toLowerCase()).length;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-display font-medium whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                      selectedCategory === cat
+                        ? 'bg-primary text-night-deep font-bold shadow-md shadow-primary/30'
+                        : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground border border-white/5'
+                    }`}
+                  >
+                    <span>{cat === 'All' ? '✨' : getCategoryMeta(cat).icon}</span>
+                    <span>{cat}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${selectedCategory === cat ? 'bg-black/30 text-white' : 'bg-white/10 text-muted-foreground'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setIsCategoryModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl text-xs font-display font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 whitespace-nowrap flex items-center gap-1"
+                title="Add or Rename Categories"
+              >
+                <Plus className="w-3.5 h-3.5" /> New Category
+              </button>
             </div>
           </div>
 
@@ -764,53 +873,79 @@ export default function EditPage() {
                   />
                 </div>
 
-                {/* Category & Price Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Category Selection */}
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                {/* Category Selection */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Category *
                     </label>
-                    <select
-                      value={formCategory}
-                      onChange={(e) => setFormCategory(e.target.value)}
-                      className="boom-select w-full text-sm"
-                    >
-                      {CATEGORY_PRESETS.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                      <option value="Custom">+ Add Custom Category</option>
-                    </select>
-
-                    {formCategory === 'Custom' && (
-                      <input
-                        type="text"
-                        placeholder="Enter custom category..."
-                        value={customCategory}
-                        onChange={(e) => setCustomCategory(e.target.value)}
-                        className="boom-input w-full text-sm mt-2"
-                        autoFocus
-                      />
-                    )}
+                    <span className="text-[11px] text-primary font-medium">
+                      Selected: <strong>{formCategory === 'Custom' ? (customCategory || 'Custom Category') : formCategory}</strong>
+                    </span>
                   </div>
 
-                  {/* Price */}
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                      Price *
-                    </label>
-                    <div className="relative">
+                  {/* Category Quick Chips */}
+                  <div className="flex flex-wrap gap-1.5 mb-2.5 max-h-32 overflow-y-auto p-1 bg-white/5 rounded-xl border border-white/10">
+                    {Array.from(new Set([...CATEGORY_PRESETS, ...products.map((p) => p.category).filter(Boolean)])).map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          setFormCategory(cat);
+                          setCustomCategory('');
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-display font-medium transition-all flex items-center gap-1 ${
+                          formCategory === cat
+                            ? 'bg-primary text-night-deep font-bold shadow-md shadow-primary/30 ring-1 ring-primary'
+                            : 'bg-white/5 text-muted-foreground hover:text-foreground hover:bg-white/10'
+                        }`}
+                      >
+                        <span>{getCategoryMeta(cat).icon}</span>
+                        <span>{cat}</span>
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setFormCategory('Custom')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-display font-medium transition-all flex items-center gap-1 ${
+                        formCategory === 'Custom'
+                          ? 'bg-amber-400 text-night-deep font-bold ring-1 ring-amber-400'
+                          : 'bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                      }`}
+                    >
+                      <span>+</span> Custom Category
+                    </button>
+                  </div>
+
+                  {formCategory === 'Custom' && (
+                    <div className="animate-in fade-in slide-in-from-top-1 duration-200">
                       <input
                         type="text"
+                        placeholder="Type new category name (e.g. Ground Spinners, Sky Bombs)..."
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        className="boom-input w-full text-xs sm:text-sm border-amber-500/50 focus:border-amber-400"
+                        autoFocus
                         required
-                        placeholder="₹450"
-                        value={formPrice}
-                        onChange={(e) => setFormPrice(e.target.value)}
-                        className="boom-input w-full text-sm"
                       />
                     </div>
+                  )}
+                </div>
+
+                {/* Price */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    Price *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      placeholder="₹450"
+                      value={formPrice}
+                      onChange={(e) => setFormPrice(e.target.value)}
+                      className="boom-input w-full text-sm"
+                    />
                   </div>
                 </div>
 
@@ -1122,6 +1257,161 @@ export default function EditPage() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ================= MANAGE CATEGORIES MODAL ================= */}
+      <AnimatePresence>
+        {isCategoryModalOpen && (
+          <div className="modal-overlay z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="modal-box max-w-xl w-full max-h-[90vh] overflow-y-auto bg-night-deep border border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-display font-bold text-foreground">Manage Product Categories</h2>
+                    <p className="text-xs text-muted-foreground">
+                      Create, rename, or organize categories across your catalog.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsCategoryModalOpen(false);
+                    setEditingCategory(null);
+                  }}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Create New Category Form */}
+              <form onSubmit={handleCreateCategory} className="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-amber-300">
+                  + Add New Category
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter new category name (e.g. Laser Fountains)..."
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    className="boom-input flex-1 text-xs sm:text-sm py-2.5"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!newCategoryName.trim()}
+                    className="btn-boom-primary px-4 py-2.5 text-xs font-bold whitespace-nowrap disabled:opacity-50"
+                  >
+                    Add & Create
+                  </button>
+                </div>
+              </form>
+
+              {/* Existing Categories List */}
+              <div className="space-y-2.5">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                  <span>Current Active Categories ({categoriesList.filter(c => c !== 'All').length})</span>
+                  <span className="text-[11px] text-muted-foreground font-normal">Products Count</span>
+                </div>
+
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {categoriesList
+                    .filter((c) => c !== 'All')
+                    .map((cat) => {
+                      const count = products.filter((p) => p.category.toLowerCase() === cat.toLowerCase()).length;
+                      const isEditing = editingCategory === cat;
+                      const meta = getCategoryMeta(cat);
+
+                      return (
+                        <div
+                          key={cat}
+                          className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-3 hover:border-white/20 transition-all"
+                        >
+                          {isEditing ? (
+                            <div className="flex items-center gap-2 flex-1">
+                              <input
+                                type="text"
+                                value={renamedCategoryName}
+                                onChange={(e) => setRenamedCategoryName(e.target.value)}
+                                className="boom-input flex-1 text-xs py-1.5"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => handleRenameCategory(cat, renamedCategoryName)}
+                                className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-bold"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingCategory(null)}
+                                className="px-2 py-1.5 rounded-lg bg-white/5 text-muted-foreground text-xs"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-xl">{meta.icon}</span>
+                                <div>
+                                  <div className="font-display font-bold text-sm text-foreground">{cat}</div>
+                                  <div className="text-[10px] text-muted-foreground">{meta.subtitle}</div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-primary border border-white/10">
+                                  {count} {count === 1 ? 'item' : 'items'}
+                                </span>
+
+                                <button
+                                  onClick={() => {
+                                    setEditingCategory(cat);
+                                    setRenamedCategoryName(cat);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-colors text-xs"
+                                  title="Rename category across all products"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  onClick={() => handleDeleteCategory(cat)}
+                                  className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors text-xs"
+                                  title="Delete category"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
+              <div className="pt-5 mt-4 border-t border-white/10 flex justify-end">
+                <button
+                  onClick={() => setIsCategoryModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-foreground text-xs font-semibold"
+                >
+                  Close Manager
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

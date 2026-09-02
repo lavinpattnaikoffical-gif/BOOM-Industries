@@ -6,14 +6,16 @@ export default function PageLoader() {
       <motion.div className="flex flex-col items-center gap-8">
         {/* Animated logo */}
         <motion.div
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          animate={{ scale: [1, 1.08, 1], rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           className="relative"
         >
-          <div className="w-16 h-16 rounded-full border-2 border-transparent bg-gradient-to-r from-primary via-ember to-primary bg-[length:200%_auto] p-0.5">
-            <div className="w-full h-full rounded-full bg-night-deep flex items-center justify-center">
-              <span className="text-primary font-display font-bold text-xl">✨</span>
-            </div>
+          <div className="w-20 h-20 rounded-full border-2 border-transparent bg-gradient-to-r from-primary via-ember to-primary bg-[length:200%_auto] p-1 shadow-xl shadow-primary/20">
+            <img
+              src="/logo.jpg"
+              alt="BOOM Industries"
+              className="w-full h-full rounded-full object-cover"
+            />
           </div>
         </motion.div>
 

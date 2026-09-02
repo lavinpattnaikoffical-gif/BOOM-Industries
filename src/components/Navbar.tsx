@@ -45,16 +45,24 @@ export default function Navbar({ onContactClick }: NavbarProps) {
     >
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between">
         {/* ── Logo ── */}
-        <a href="/" className="flex items-center gap-2 group py-1">
-          <div className="boom-logo-text text-xl sm:text-2xl leading-none tracking-tight">
-            <span className="boom-B">B</span>
-            <span className="boom-O1">O</span>
-            <span className="boom-O2">O</span>
-            <span className="boom-M">M</span>
+        <a href="/" className="flex items-center gap-2.5 sm:gap-3 group py-1">
+          <div className="relative flex-shrink-0">
+            <img
+              src="/logo.jpg"
+              alt="BOOM Industries Logo"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-primary/40 group-hover:ring-primary shadow-md shadow-primary/20 group-hover:scale-105 transition-all duration-300"
+            />
+            <span className="absolute inset-0 rounded-full bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </div>
-          <div className="flex flex-col leading-none">
+          <div className="flex flex-col">
+            <div className="boom-logo-text text-xl sm:text-2xl leading-none tracking-tight">
+              <span className="boom-B">B</span>
+              <span className="boom-O1">O</span>
+              <span className="boom-O2">O</span>
+              <span className="boom-M">M</span>
+            </div>
             <span
-              className="text-[9px] sm:text-[10px] font-body font-semibold tracking-[0.15em] uppercase text-muted-foreground/80"
+              className="text-[9px] sm:text-[10px] font-body font-semibold tracking-[0.18em] uppercase text-muted-foreground/80 group-hover:text-foreground transition-colors"
             >
               Industries
             </span>
@@ -96,33 +104,33 @@ export default function Navbar({ onContactClick }: NavbarProps) {
             </button>
           )}
 
-          {/* Instagram Link */}
+          {/* Instagram Link - Big & Noticeable */}
           <a
             href="https://instagram.com/boom_fireworks_official"
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 rounded-xl text-sm font-display font-medium transition-all duration-300 hover:scale-110"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-display font-bold transition-all duration-300 hover:scale-105 shadow-md group relative overflow-hidden text-white"
             style={{
-              background: 'rgba(239,68,68,0.1)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              color: '#f87171',
+              background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+              boxShadow: '0 4px 15px rgba(220, 39, 67, 0.35)',
             }}
-            title="Follow us on Instagram"
+            title="Follow @boom_fireworks_official on Instagram"
           >
-            <Instagram className="w-4 h-4" />
+            <Instagram className="w-5 h-5 text-white stroke-[2.2] group-hover:rotate-6 transition-transform" />
+            <span className="hidden xl:inline tracking-wide">Instagram</span>
           </a>
           
           {/* Phone */}
           <a
             href="tel:9920976669"
-            className="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-display font-semibold transition-all duration-300"
+            className="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-display font-semibold transition-all duration-300 hover:bg-green-500/20"
             style={{
-              background: 'rgba(22,163,74,0.1)',
+              background: 'rgba(22,163,74,0.12)',
               border: '1px solid rgba(22,163,74,0.3)',
               color: '#4ade80',
             }}
           >
-            <Phone className="w-3.5 h-3.5" /> 9920976669
+            <Phone className="w-4 h-4 text-green-400" /> 9920976669
           </a>
 
           {/* Get Quote CTA */}
@@ -132,7 +140,7 @@ export default function Navbar({ onContactClick }: NavbarProps) {
         </div>
 
         {/* ── Mobile Actions ── */}
-        <div className="flex md:hidden items-center gap-2.5">
+        <div className="flex md:hidden items-center gap-2">
           {itemCount > 0 && (
             <button
               onClick={onContactClick}
@@ -150,6 +158,21 @@ export default function Navbar({ onContactClick }: NavbarProps) {
               </span>
             </button>
           )}
+
+          {/* Mobile Instagram Button - Big & Noticeable */}
+          <a
+            href="https://instagram.com/boom_fireworks_official"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-9 h-9 rounded-xl text-white shadow-md transition-all active:scale-95"
+            style={{
+              background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+              boxShadow: '0 2px 10px rgba(220, 39, 67, 0.4)',
+            }}
+            aria-label="Follow us on Instagram"
+          >
+            <Instagram className="w-5 h-5 stroke-[2.2]" />
+          </a>
 
           <a
             href="tel:9920976669"
@@ -229,16 +252,19 @@ export default function Navbar({ onContactClick }: NavbarProps) {
                   href="tel:9920976669"
                   className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-display font-semibold bg-green-500/10 border border-green-500/30 text-green-400"
                 >
-                  <Phone className="w-3.5 h-3.5" /> Call Us
+                  <Phone className="w-4 h-4" /> Call Us
                 </a>
 
                 <a
                   href="https://instagram.com/boom_fireworks_official"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-display font-semibold bg-red-500/10 border border-red-500/30 text-red-400"
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-display font-bold text-white shadow-md"
+                  style={{
+                    background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                  }}
                 >
-                  <Instagram className="w-3.5 h-3.5" /> Instagram
+                  <Instagram className="w-4 h-4 stroke-[2.2]" /> Instagram
                 </a>
               </div>
             </div>

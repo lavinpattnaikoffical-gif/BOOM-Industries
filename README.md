@@ -1,6 +1,6 @@
 # 🎆 BOOM Industries — BFW Fireworks
 
-India's premier fireworks manufacturer, wholesaler, trader, and retailer based in Latur, Maharashtra. Lighting up celebrations for decades with quality, innovation, and safety.
+India's Premium Fireworks Manufacturer, Wholesaler, Trader, and Retailer based in Latur, Maharashtra. Lighting up celebrations for decades with quality, innovation, and safety.
 
 ---
 

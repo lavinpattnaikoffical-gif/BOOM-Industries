@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Phone, User, MapPin, Package, Loader2, MessageSquare, Trash2 } from 'lucide-react';
+import { X, Phone, User, MapPin, Package, Loader2, Trash2 } from 'lucide-react';
+import WhatsAppIcon from './WhatsAppIcon';
 import { useToast } from '@/hooks/use-toast';
 import { useInquiryCart } from '@/contexts/InquiryContext';
 import { sendInquiryViaEmail } from '@/utils/mailHelper';
@@ -248,7 +249,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
                 {submitting ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Sending...</>
                 ) : (
-                   <><MessageSquare className="w-5 h-5" /> Submit Request</>
+                   <><WhatsAppIcon className="w-5 h-5" /> Submit Request via WhatsApp</>
                 )}
               </button>
             </div>
